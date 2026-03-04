@@ -3,34 +3,87 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Latest Tweet</title>
+<title>Latest Post</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: transparent;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 8px;
+  body { background: transparent; font-family: 'Noto Sans JP', sans-serif; padding: 8px; }
+  #tweet-card {
+    background: rgba(10,0,0,0.82);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 14px;
+    padding: 14px 16px;
+    max-width: 380px;
+    backdrop-filter: blur(8px);
+    display: none;
   }
-  .twitter-wrap {
-    width: 100%;
-    max-width: 400px;
+  .tweet-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .tweet-avatar {
+    width:32px; height:32px; border-radius:50%;
+    background: linear-gradient(135deg,#1a0000,#2a0000);
+    border:1px solid rgba(201,168,76,0.4);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; flex-shrink:0;
   }
+  .tweet-name { font-size:12px; font-weight:700; color:#ffd700; }
+  .tweet-handle { font-size:10px; color:rgba(255,255,255,0.35); font-family:'Space Mono',monospace; }
+  .tweet-text { font-size:13px; color:rgba(255,255,255,0.88); line-height:1.65; word-break:break-word; }
+  .tweet-footer {
+    margin-top:10px; font-size:10px; color:rgba(255,255,255,0.25);
+    font-family:'Space Mono',monospace;
+    display:flex; justify-content:space-between;
+  }
+  #status { font-size:11px; color:rgba(255,255,255,0.3); padding:20px; text-align:center; font-family:'Space Mono',monospace; }
 </style>
 </head>
 <body>
 
-<div class="twitter-wrap">
-  <a class="twitter-timeline"
-     href="https://twitter.com/choiizuka"
-     data-tweet-limit="1"
-     data-theme="dark"
-     data-chrome="noheader nofooter noborders transparent">
-  </a>
+<div id="tweet-card">
+  <div class="tweet-header">
+    <div class="tweet-avatar">👑</div>
+    <div>
+      <div class="tweet-name">CHOIIZUKA</div>
+      <div class="tweet-handle">@choiizuka</div>
+    </div>
+  </div>
+  <div class="tweet-text" id="tweet-text"></div>
+  <div class="tweet-footer">
+    <span id="tweet-time"></span>
+    <span>𝕏</span>
+  </div>
 </div>
+<div id="status">LOADING...</div>
 
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<script>
+  const RSS_URL = 'https://rsshub.app/twitter/user/choiizuka';
+  const API_URL = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(RSS_URL);
+
+  async function fetchLatestTweet() {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      if (data.status !== 'ok' || !data.items?.length) throw new Error('No items');
+
+      const item = data.items[0];
+      const text = item.description.replace(/<[^>]+>/g, '').trim();
+      const date = new Date(item.pubDate);
+      const timeStr = date.toLocaleString('ja-JP', {
+        month:'numeric', day:'numeric',
+        hour:'2-digit', minute:'2-digit'
+      });
+
+      document.getElementById('tweet-text').textContent = text;
+      document.getElementById('tweet-time').textContent = timeStr;
+      document.getElementById('tweet-card').style.display = 'block';
+      document.getElementById('status').style.display = 'none';
+    } catch(e) {
+      document.getElementById('status').textContent = '⚠️ ' + e.message;
+    }
+  }
+
+  fetchLatestTweet();
+  setInterval(fetchLatestTweet, 120000);
+</script>
 
 </body>
 </html>
