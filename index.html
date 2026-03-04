@@ -1,0 +1,313 @@
+# choiizuka.github.io
+GitHub Pages
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHOIIZUKA — Nobunaga OS</title>
+<meta name="description" content="AI Fleet Commander. Love & Peace Protocol. The Nobunaga OS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-dim: rgba(201,168,76,0.15);
+    --red: #c0392b;
+    --ink: #0c0c0e;
+    --paper: #f5f0e8;
+    --smoke: rgba(245,240,232,0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Space Mono', monospace;
+    overflow-x: hidden;
+  }
+
+  /* 和紙テクスチャ背景 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(192,57,43,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* 縦線パターン */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 79px,
+      rgba(255,255,255,0.015) 79px,
+      rgba(255,255,255,0.015) 80px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+  }
+
+  /* ヘッダー */
+  .hero {
+    text-align: center;
+    margin-bottom: 64px;
+    animation: fadeDown 1s ease forwards;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-kamon {
+    font-size: 48px;
+    margin-bottom: 20px;
+    display: block;
+    filter: drop-shadow(0 0 20px rgba(201,168,76,0.4));
+  }
+
+  .hero-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(36px, 8vw, 72px);
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    color: var(--paper);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .hero-title span {
+    color: var(--gold);
+  }
+
+  .hero-sub {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: rgba(245,240,232,0.35);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .hero-tagline {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 15px;
+    color: rgba(245,240,232,0.5);
+    letter-spacing: 0.08em;
+    line-height: 1.8;
+  }
+
+  /* 区切り線 */
+  .divider {
+    width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 0 auto 56px;
+    opacity: 0.4;
+  }
+
+  /* リンクグリッド */
+  .links-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+    max-width: 480px;
+    margin-bottom: 40px;
+  }
+
+  .link-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 28px 20px;
+    border: 1px solid rgba(245,240,232,0.08);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--paper);
+    background: var(--smoke);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .link-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--gold-dim), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .link-card:hover::before { opacity: 1; }
+  .link-card:hover {
+    border-color: rgba(201,168,76,0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.4), 0 0 20px rgba(201,168,76,0.08);
+  }
+
+  .link-card:nth-child(1) { animation-delay: 0.2s; }
+  .link-card:nth-child(2) { animation-delay: 0.3s; }
+  .link-card:nth-child(3) { animation-delay: 0.4s; }
+  .link-card:nth-child(4) { animation-delay: 0.5s; }
+  .link-card:nth-child(5) { animation-delay: 0.6s; animation-duration: 0.6s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .link-icon {
+    font-size: 28px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .link-label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.6);
+    position: relative;
+    z-index: 1;
+  }
+
+  .link-desc {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 12px;
+    color: rgba(245,240,232,0.35);
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  /* Kindleは2列幅 */
+  .link-card.wide {
+    grid-column: span 2;
+    flex-direction: row;
+    gap: 16px;
+    padding: 22px 28px;
+  }
+
+  .link-card.wide .link-icon { font-size: 32px; }
+
+  .link-card.wide .link-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .link-card.wide .link-label {
+    font-size: 12px;
+  }
+
+  /* フッター */
+  .footer-text {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 13px;
+    color: rgba(245,240,232,0.2);
+    text-align: center;
+    letter-spacing: 0.1em;
+    animation: fadeUp 0.6s 0.8s ease forwards;
+    opacity: 0;
+  }
+
+  .footer-text em {
+    color: rgba(201,168,76,0.4);
+    font-style: normal;
+  }
+
+  /* モバイル */
+  @media (max-width: 420px) {
+    .links-grid { grid-template-columns: 1fr; }
+    .link-card.wide { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <div class="hero">
+    <span class="hero-kamon">🏯</span>
+    <h1 class="hero-title">CHOII<span>ZUKA</span></h1>
+    <p class="hero-sub">Nobunaga OS &nbsp;·&nbsp; AI Fleet Commander &nbsp;·&nbsp; Yokohama</p>
+    <p class="hero-tagline">
+      愛と平和は感情ではない。プロトコルだ。<br>
+      <small style="font-size:12px;opacity:0.6;">Love & Peace are not emotions — they are protocols.</small>
+    </p>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="links-grid">
+
+    <!-- Kindle -->
+    <a class="link-card wide" href="https://amzn.to/4aY25G3" target="_blank" rel="noopener">
+      <div class="link-icon">📚</div>
+      <div class="link-text">
+        <span class="link-label">Kindle</span>
+        <span class="link-desc">The Nagisa Protocol &amp; Nobunaga OS<br>日本語版 &amp; English Edition</span>
+      </div>
+    </a>
+
+    <!-- X -->
+    <a class="link-card" href="https://x.com/choiizuka" target="_blank" rel="noopener">
+      <div class="link-icon">𝕏</div>
+      <span class="link-label">X / Twitter</span>
+      <span class="link-desc">@choiizuka</span>
+    </a>
+
+    <!-- Instagram -->
+    <a class="link-card" href="https://instagram.com/choiizuka" target="_blank" rel="noopener">
+      <div class="link-icon">📸</div>
+      <span class="link-label">Instagram</span>
+      <span class="link-desc">@choiizuka</span>
+    </a>
+
+    <!-- YouTube -->
+    <a class="link-card wide" href="https://www.youtube.com/@choiizuka" target="_blank" rel="noopener">
+      <div class="link-icon">▶️</div>
+      <div class="link-text">
+        <span class="link-label">YouTube</span>
+        <span class="link-desc">ライブ配信 &amp; AI艦隊チャンネル</span>
+      </div>
+    </a>
+
+  </div>
+
+  <p class="footer-text">
+    <em>決めた。以上。</em><br>
+    Decided. That's it. &nbsp;🌹✨
+  </p>
+
+</div>
+
+</body>
+</html>
