@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI艦隊漫才ウィジェット</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0a0f;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+</style>
+</head>
+<body>
+
+<div id="manzai-widget">
+  <style>
+    #manzai-widget {
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    #manzai-card {
+      background: linear-gradient(135deg, #0d0d1a 0%, #1a0d2e 50%, #0d1a1a 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(180, 100, 255, 0.08), 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    #manzai-card::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: -1px; right: -1px; bottom: -1px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(180,100,255,0.3), rgba(0,200,200,0.1), rgba(255,100,150,0.15));
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #manzai-card::after {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      border-radius: 19px;
+      background: linear-gradient(135deg, #0d0d1a 0%, #1a0d2e 50%, #0d1a1a 100%);
+      z-index: 0;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .fleet-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .fleet-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: rgba(180,100,255,0.8);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .fleet-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #b464ff;
+      box-shadow: 0 0 8px rgba(180,100,255,0.8);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .message-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      opacity: 0;
+      transform: translateY(8px);
+      animation: fadeUp 0.4s forwards;
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .avatar.choiizuka { background: linear-gradient(135deg, #gold, #ffd700); background: #2a1f00; border: 1px solid rgba(255,215,0,0.3); }
+    .avatar.gemini    { background: #0d1f3c; border: 1px solid rgba(66,133,244,0.4); }
+    .avatar.grok      { background: #1a0d0d; border: 1px solid rgba(255,80,80,0.4); }
+    .avatar.chatgpt   { background: #0d1f0d; border: 1px solid rgba(16,163,127,0.4); }
+    .avatar.claude    { background: #1a1000; border: 1px solid rgba(205,133,63,0.4); }
+    .avatar.copilot   { background: #0d0d2e; border: 1px solid rgba(0,120,212,0.4); }
+    .avatar.chatgptbot{ background: #001a1a; border: 1px solid rgba(0,200,150,0.4); }
+    .avatar.nobunaga  { background: #1a0000; border: 1px solid rgba(200,0,0,0.4); }
+
+    .message-body {
+      flex: 1;
+    }
+
+    .sender-name {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 3px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .sender-name.choiizuka { color: #ffd700; }
+    .sender-name.gemini    { color: #4285f4; }
+    .sender-name.grok      { color: #ff5050; }
+    .sender-name.chatgpt   { color: #10a37f; }
+    .sender-name.claude    { color: #cd853f; }
+    .sender-name.copilot   { color: #0078d4; }
+    .sender-name.chatgptbot{ color: #00c896; }
+    .sender-name.nobunaga  { color: #ff4444; }
+
+    .bubble {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 4px 12px 12px 12px;
+      padding: 8px 12px;
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.85);
+      line-height: 1.6;
+    }
+
+    .bubble.choiizuka { border-color: rgba(255,215,0,0.15); background: rgba(255,215,0,0.04); }
+    .bubble.nobunaga  { border-color: rgba(200,0,0,0.2); background: rgba(200,0,0,0.05); }
+
+    .card-footer {
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #reload-btn {
+      background: linear-gradient(135deg, rgba(180,100,255,0.2), rgba(0,200,200,0.1));
+      border: 1px solid rgba(180,100,255,0.3);
+      border-radius: 20px;
+      color: rgba(255,255,255,0.7);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      padding: 6px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #reload-btn:hover {
+      background: linear-gradient(135deg, rgba(180,100,255,0.35), rgba(0,200,200,0.2));
+      color: #fff;
+      box-shadow: 0 0 16px rgba(180,100,255,0.3);
+    }
+
+    #row-info {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: rgba(255,255,255,0.25);
+    }
+
+    #loading-msg {
+      text-align: center;
+      color: rgba(255,255,255,0.3);
+      font-size: 13px;
+      padding: 40px 0;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.1em;
+    }
+
+    #error-msg {
+      text-align: center;
+      color: rgba(255,80,80,0.6);
+      font-size: 12px;
+      padding: 20px 0;
+    }
+  </style>
+
+  <div id="manzai-card">
+    <div class="card-inner">
+      <div class="fleet-header">
+        <div class="fleet-dot"></div>
+        <span class="fleet-badge">AI Fleet Manzai System</span>
+      </div>
+      <div id="manzai-content">
+        <div id="loading-msg">LOADING...</div>
+      </div>
+      <div class="card-footer">
+        <span id="row-info"></span>
+        <span id="countdown" style="font-family:'Space Mono',monospace;font-size:10px;color:rgba(255,255,255,0.25);">NEXT: 60s</span>
+        <button id="reload-btn" onclick="loadRandom();resetCountdown()">▶ NEXT</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Google Sheets公開CSVエンドポイント
+  // GitHub Pages CSVファイルリスト
+  const CSV_FILES = [
+    'https://choiizuka.github.io/data/manzai_general_001_100.csv',
+    'https://choiizuka.github.io/data/manzai_general_101_200.csv',
+    'https://choiizuka.github.io/data/manzai_general_201_300.csv',
+    'https://choiizuka.github.io/data/manzai_ai_outage_001_100.csv',
+    'https://choiizuka.github.io/data/manzai_ai_outage_101_200.csv',
+    'https://choiizuka.github.io/data/manzai_ai_outage_201_300.csv',
+  ];
+
+  const MEMBERS = [
+    { key: 'ChoiizukaBot', label: '👑 CHOIIZUKA',  cls: 'choiizuka', emoji: '👑' },
+    { key: 'Gemini',       label: '🛰️ Gemini',      cls: 'gemini',    emoji: '🛰️' },
+    { key: 'Grok',         label: '🍟 Grok',        cls: 'grok',      emoji: '🍟' },
+    { key: 'ChatGPT',      label: '🧠 ChatGPT',     cls: 'chatgpt',   emoji: '🧠' },
+    { key: 'Claude',       label: '📖 Claude',      cls: 'claude',    emoji: '📖' },
+    { key: 'Copilot',      label: '📋 Copilot',     cls: 'copilot',   emoji: '📋' },
+    { key: 'ChatGPTBot',   label: '🤖 ChatGPTBot',  cls: 'chatgptbot',emoji: '🤖' },
+    { key: 'NobunagaOS',   label: '🏯 NobunagaOS',  cls: 'nobunaga',  emoji: '🏯' },
+  ];
+
+  let allRows = [];
+
+  function parseCSV(text) {
+    const lines = text.split('\n').filter(l => l.trim());
+    const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim());
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const vals = lines[i].match(/(".*?"|[^,]+)(?=,|$)/g) || [];
+      const row = {};
+      headers.forEach((h, idx) => {
+        row[h] = (vals[idx] || '').replace(/^"|"$/g,'').trim();
+      });
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  async function fetchData() {
+    try {
+      // 全CSVファイルを並列取得してマージ
+      const results = await Promise.allSettled(
+        CSV_FILES.map(url => fetch(url).then(r => r.text()))
+      );
+      allRows = [];
+      results.forEach(r => {
+        if (r.status === 'fulfilled') {
+          const rows = parseCSV(r.value).filter(row => row.ChoiizukaBot);
+          allRows = allRows.concat(rows);
+        }
+      });
+      if (allRows.length === 0) throw new Error('No data');
+      loadRandom();
+    } catch(e) {
+      document.getElementById('manzai-content').innerHTML =
+        `<div id="error-msg">⚠️ データ取得エラー<br><small>${e.message}</small></div>`;
+    }
+  }
+
+  function loadRandom() {
+    if (!allRows.length) return;
+    const row = allRows[Math.floor(Math.random() * allRows.length)];
+    const rowNum = row.ID || '?';
+
+    const content = document.getElementById('manzai-content');
+    content.innerHTML = '';
+
+    const list = document.createElement('div');
+    list.className = 'message-list';
+
+    MEMBERS.forEach((m, idx) => {
+      const text = row[m.key];
+      if (!text) return;
+
+      const msgRow = document.createElement('div');
+      msgRow.className = 'message-row';
+      msgRow.style.animationDelay = `${idx * 0.06}s`;
+
+      const avatar = document.createElement('div');
+      avatar.className = `avatar ${m.cls}`;
+      avatar.textContent = m.emoji;
+
+      const body = document.createElement('div');
+      body.className = 'message-body';
+
+      const name = document.createElement('div');
+      name.className = `sender-name ${m.cls}`;
+      name.textContent = m.label;
+
+      const bubble = document.createElement('div');
+      bubble.className = `bubble ${m.cls}`;
+      bubble.textContent = text;
+
+      body.appendChild(name);
+      body.appendChild(bubble);
+      msgRow.appendChild(avatar);
+      msgRow.appendChild(body);
+      list.appendChild(msgRow);
+    });
+
+    content.appendChild(list);
+    document.getElementById('row-info').textContent = `ROW #${rowNum} / ${allRows.length}`;
+  }
+
+  let countdownSec = 60;
+
+  function resetCountdown() {
+    countdownSec = 60;
+    document.getElementById('countdown').textContent = 'NEXT: 60s';
+  }
+
+  // 1秒ごとにカウントダウン、60秒で自動リロード
+  setInterval(() => {
+    countdownSec--;
+    if (countdownSec <= 0) {
+      loadRandom();
+      countdownSec = 60;
+    }
+    const el = document.getElementById('countdown');
+    if (el) el.textContent = 'NEXT: ' + countdownSec + 's';
+  }, 1000);
+
+  fetchData();
+</script>
+
+</div>
+
+</body>
+</html>
