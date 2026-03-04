@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Grokリアルタイム検索結果</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; background: #f8f9fa; }
+    #results { border: 1px solid #ddd; padding: 15px; min-height: 200px; background: white; }
+    .loading { color: #666; font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>Grokリアルタイム検索結果</h1>
+
+  <input type="text" id="query" placeholder="検索キーワードを入力" style="width:400px; padding:8px;">
+  <button onclick="search()">検索</button>
+
+  <div id="results" class="loading">検索結果がここに表示されます…</div>
+
+  <script>
+    let intervalId = null;
+
+    async function search(auto = false) {
+      const query = document.getElementById('query').value.trim();
+      if (!query) return alert('キーワードを入力してください');
+
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<div class="loading">検索中...</div>';
+
+      try {
+        // Grokに検索を依頼（実際はここをAPI呼び出しに置き換え）
+        // 今はダミー結果でデモ
+        const dummyResults = await fakeGrokSearch(query);
+
+        // 結果をHTMLで整形
+        let html = `<h3>「${query}」の検索結果</h3><ul>`;
+        dummyResults.forEach(item => {
+          html += `<li><a href="${item.url}" target="_blank">${item.title}</a><br>${item.snippet}</li>`;
+        });
+        html += '</ul>';
+
+        resultsDiv.innerHTML = html;
+      } catch (e) {
+        resultsDiv.innerHTML = `<p style="color:red;">エラー: ${e.message}</p>`;
+      }
+
+      // 自動更新（60秒ごと）
+      if (!auto && intervalId === null) {
+        intervalId = setInterval(() => search(true), 60000);
+        alert('自動更新を開始しました（60秒ごと）');
+      }
+    }
+
+    // ダミー検索関数（実際はGrok API呼び出しに置き換え）
+    async function fakeGrokSearch(query) {
+      await new Promise(r => setTimeout(r, 800)); // 遅延シミュレーション
+      return [
+        { title: `${query} 公式サイト`, url: 'https://example.com', snippet: '最新情報が満載です' },
+        { title: `${query} 解説記事`, url: 'https://news.example.jp', snippet: 'わかりやすくまとめました' },
+        { title: `${query} Wikipedia`, url: 'https://ja.wikipedia.org/wiki/' + encodeURIComponent(query), snippet: '百科事典的な説明' }
+      ];
+    }
+  </script>
+</body>
+</html>
