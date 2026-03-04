@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marquee URL Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: radial-gradient(ellipse at 30% 10%, #1a0000 0%, #0a0000 40%, #000 100%);
+    min-height: 100vh;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: rgba(255,255,255,0.85);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 16px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: rgba(201,168,76,0.7);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.4);
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: rgba(255,255,255,0.85);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus, textarea:focus {
+    border-color: rgba(201,168,76,0.4);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.2), transparent);
+    margin: 20px 0;
+  }
+
+  .output-box {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: rgba(201,168,76,0.8);
+    word-break: break-all;
+    line-height: 1.6;
+    min-height: 48px;
+    margin-bottom: 12px;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+
+  .btn-copy {
+    background: linear-gradient(135deg, rgba(201,168,76,0.3), rgba(201,168,76,0.15));
+    border: 1px solid rgba(201,168,76,0.4);
+    color: #ffd700;
+  }
+
+  .btn-copy:hover {
+    background: linear-gradient(135deg, rgba(201,168,76,0.5), rgba(201,168,76,0.3));
+    box-shadow: 0 0 16px rgba(201,168,76,0.2);
+  }
+
+  .btn-preview {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+  }
+
+  .btn-preview:hover {
+    border-color: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.8);
+  }
+
+  .copied {
+    background: linear-gradient(135deg, rgba(0,200,100,0.3), rgba(0,200,100,0.15)) !important;
+    border-color: rgba(0,200,100,0.4) !important;
+    color: #00ff88 !important;
+  }
+
+  .preset-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .preset-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+
+  .preset-btn:hover {
+    border-color: rgba(201,168,76,0.3);
+    color: rgba(201,168,76,0.7);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>🏯 Marquee URL Generator</h1>
+
+  <div class="field">
+    <label>テキスト</label>
+    <textarea id="text" placeholder="📚 Kindleから書籍出版中！✅ Kindle Unlimited対象商品..."></textarea>
+  </div>
+
+  <div class="field">
+    <label>プリセット</label>
+    <div class="preset-row">
+      <button class="preset-btn" onclick="setPreset('kindle')">📚 Kindle告知</button>
+      <button class="preset-btn" onclick="setPreset('live')">🎥 ライブ告知</button>
+      <button class="preset-btn" onclick="setPreset('outage')">🤖 AI障害ネタ</button>
+      <button class="preset-btn" onclick="setPreset('love')">🌹 愛と平和</button>
+      <button class="preset-btn" onclick="setPreset('nobunaga')">🏯 信長OS</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label>Speed（秒）</label>
+      <input type="number" id="speed" value="20" min="5" max="60">
+    </div>
+    <div class="field">
+      <label>文字色（HEX）</label>
+      <input type="text" id="color" value="ffd700" placeholder="ffd700">
+    </div>
+    <div class="field">
+      <label>サイズ（px）</label>
+      <input type="number" id="size" value="18" min="10" max="48">
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="output-box" id="output">URLがここに表示されます</div>
+
+  <div class="btn-row">
+    <button class="btn-copy" id="copy-btn" onclick="copyURL()">📋 URLをコピー</button>
+    <button class="btn-preview" onclick="openPreview()">👁 プレビュー</button>
+  </div>
+
+</div>
+
+<script>
+  const BASE = 'https://choiizuka.github.io/marquee.html';
+
+  const PRESETS = {
+    kindle:   '📚 Kindleから書籍出版中！　✅ Kindle Unlimited対象商品　🏯 信長OS × 愛と平和　👑 CHOIIZUKA著　🌹 今すぐ読む → https://amzn.to/4aY25G3',
+    live:     '🎥 ただいまライブ配信中！　👑 CHOIIZUKA　🌹 愛と平和プロトコル稼働中　📚 Kindle書籍も出版中！',
+    outage:   '🤖 AI大規模障害発生中！　🏯 信長OSは今日も稼働中　💪 ローカルAIで主権確立せよ　#AIOutage #AI大規模障害 #信長OS',
+    love:     '🌹 愛と平和は感情ではない。プロトコルだ。　✨ Love & Peace are not emotions — they are protocols.　👑 CHOIIZUKA',
+    nobunaga: '🏯 行動しなければ全ては無である。以上。　⚔️ 信長OS稼働中　👑 天下布武　🌹 愛と平和 × AI軍団',
+  };
+
+  function generate() {
+    const text  = document.getElementById('text').value.trim();
+    const speed = document.getElementById('speed').value;
+    const color = document.getElementById('color').value.replace('#','');
+    const size  = document.getElementById('size').value;
+
+    if (!text) {
+      document.getElementById('output').textContent = 'テキストを入力してください';
+      return '';
+    }
+
+    const params = new URLSearchParams();
+    params.set('text', text);
+    if (speed !== '20') params.set('speed', speed);
+    if (color !== 'ffd700') params.set('color', color);
+    if (size !== '18') params.set('size', size);
+
+    const url = BASE + '?' + params.toString();
+    document.getElementById('output').textContent = url;
+    return url;
+  }
+
+  function copyURL() {
+    const url = generate();
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = '✅ コピーしました！';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = '📋 URLをコピー';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  function openPreview() {
+    const url = generate();
+    if (url) window.open(url, '_blank');
+  }
+
+  function setPreset(key) {
+    document.getElementById('text').value = PRESETS[key];
+    generate();
+  }
+
+  // リアルタイム生成
+  ['text','speed','color','size'].forEach(id => {
+    document.getElementById(id).addEventListener('input', generate);
+  });
+
+  generate();
+</script>
+
+</body>
+</html>
