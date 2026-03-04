@@ -8,6 +8,7 @@
     body { font-family: system-ui, sans-serif; margin: 20px; background: #f0f4f8; color: #333; }
     h1 { color: #1a73e8; }
     #query { font-size: 1.1em; padding: 8px; width: 400px; border: 1px solid #ccc; border-radius: 6px; }
+    #interval { font-size: 1.1em; padding: 8px; width: 100px; border: 1px solid #ccc; border-radius: 6px; }
     #results { margin-top: 20px; border: 1px solid #ddd; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); min-height: 300px; }
     .loading { color: #777; font-style: italic; text-align: center; padding: 40px 0; }
     .error { color: #d93025; text-align: center; padding: 20px; }
@@ -17,39 +18,61 @@
     li a:hover { text-decoration: underline; }
     .snippet { color: #555; margin-top: 4px; font-size: 0.95em; }
     .info { font-size: 0.9em; color: #666; margin: 10px 0; }
+    button { padding: 10px 20px; background: #1a73e8; color: white; border: none; border-radius: 6px; cursor: pointer; margin-left: 10px; }
   </style>
 </head>
 <body>
   <h1>Grokリアルタイム自動検索結果</h1>
 
-  <label for="query">検索キーワード（URLに ?q=キーワード で自動検索可能）</label><br>
+  <label for="query">検索キーワード（URLに ?q=キーワード で自動検索）</label><br>
   <input type="text" id="query" placeholder="検索キーワードを入力" style="margin: 10px 0; width:400px; padding:8px;">
 
-  <div id="results" class="loading">検索を開始します…（自動更新: 60秒ごと）</div>
+  <label for="interval">更新間隔（秒）: </label>
+  <input type="number" id="interval" value="60" min="10" max="3600" style="width:80px; padding:8px;">秒
 
-  <p class="info">例: grok-search.html?q=最新のAIニュース で開くと自動検索開始</p>
+  <button onclick="startSearch()">開始/更新</button>
+
+  <div id="results" class="loading">検索を開始します…</div>
+
+  <p class="info">
+    例: grok-search.html?q=最新のAIニュース&interval=30 で30秒自動更新  
+    パラメーターなし → 手動検索モード
+  </p>
 
   <script>
     let intervalId = null;
-    const UPDATE_INTERVAL = 60000; // 60秒（変更可能）
 
-    async function performSearch(isAuto = false) {
+    function startSearch() {
       const queryInput = document.getElementById('query');
+      const intervalInput = document.getElementById('interval');
       let query = queryInput.value.trim();
+      let intervalSec = parseInt(intervalInput.value) || 60;
 
-      // URLパラメーター優先（?q=xxx）
+      // URLパラメーター優先
       const urlParams = new URLSearchParams(window.location.search);
       const urlQuery = urlParams.get('q');
-      if (urlQuery) {
-        query = decodeURIComponent(urlQuery);
-        queryInput.value = query; // 入力欄にも反映
-      }
+      const urlInterval = parseInt(urlParams.get('interval'));
+
+      if (urlQuery) query = decodeURIComponent(urlQuery);
+      if (urlInterval && urlInterval >= 10 && urlInterval <= 3600) intervalSec = urlInterval;
+
+      queryInput.value = query;
+      intervalInput.value = intervalSec;
 
       if (!query) {
         document.getElementById('results').innerHTML = '<p class="error">キーワードを入力するか、URLに ?q=キーワード を付けてください</p>';
         return;
       }
 
+      performSearch(query);
+
+      // 自動更新（初回のみセット）
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(() => performSearch(query), intervalSec * 1000);
+      alert(`自動更新を開始しました（${intervalSec}秒ごと）`);
+    }
+
+    async function performSearch(query) {
       const resultsDiv = document.getElementById('results');
       resultsDiv.innerHTML = '<div class="loading">Grokが検索中... 🚀</div>';
 
@@ -76,11 +99,6 @@
       } catch (e) {
         resultsDiv.innerHTML = `<p class="error">エラー: ${e.message}</p>`;
       }
-
-      // 自動更新開始（初回のみ）
-      if (!intervalId) {
-        intervalId = setInterval(() => performSearch(true), UPDATE_INTERVAL);
-      }
     }
 
     // ダミー検索関数（本番ではGrok APIに置き換え）
@@ -93,9 +111,12 @@
       ];
     }
 
-    // ページ読み込み時に自動検索開始
+    // ページ読み込み時にURLパラメーターがあれば自動開始
     window.onload = () => {
-      performSearch();
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('q')) {
+        startSearch();
+      }
     };
   </script>
 </body>
