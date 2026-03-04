@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latest Tweet</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 8px;
+  }
+  .twitter-wrap {
+    width: 100%;
+    max-width: 400px;
+  }
+</style>
+</head>
+<body>
+
+<div class="twitter-wrap">
+  <a class="twitter-timeline"
+     href="https://twitter.com/choiizuka"
+     data-tweet-limit="1"
+     data-theme="dark"
+     data-chrome="noheader nofooter noborders transparent">
+  </a>
+</div>
+
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+</body>
+</html>
