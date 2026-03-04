@@ -24,20 +24,21 @@ GitHub Pages
 
   html, body {
     height: 100%;
-    background: var(--ink);
+    background: radial-gradient(ellipse at 30% 10%, #1a0000 0%, #0a0000 40%, #000000 100%);
     color: var(--paper);
     font-family: 'Space Mono', monospace;
     overflow-x: hidden;
   }
 
-  /* 和紙テクスチャ背景 */
+  /* 赤い薔薇×黒のグラデーション背景 */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     background-image:
-      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(192,57,43,0.04) 0%, transparent 50%);
+      radial-gradient(ellipse 70% 70% at 20% 20%, rgba(160,20,20,0.55) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 80%, rgba(120,0,0,0.45) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(80,0,0,0.2) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -298,6 +299,20 @@ GitHub Pages
         <span class="link-label">YouTube</span>
         <span class="link-desc">ライブ配信 &amp; AI艦隊チャンネル</span>
       </div>
+    </a>
+
+    <!-- WordPress EN -->
+    <a class="link-card" href="https://choiizuka.wordpress.com/" target="_blank" rel="noopener">
+      <div class="link-icon">🌐</div>
+      <span class="link-label">Blog (EN)</span>
+      <span class="link-desc">choiizuka.wordpress.com</span>
+    </a>
+
+    <!-- WordPress JP -->
+    <a class="link-card" href="https://choappceo.wordpress.com" target="_blank" rel="noopener">
+      <div class="link-icon">📝</div>
+      <span class="link-label">ブログ (JP)</span>
+      <span class="link-desc">choappceo.wordpress.com</span>
     </a>
 
   </div>
