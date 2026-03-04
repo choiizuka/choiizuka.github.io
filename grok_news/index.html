@@ -69,7 +69,7 @@
       // 自動更新（初回のみセット）
       if (intervalId) clearInterval(intervalId);
       intervalId = setInterval(() => performSearch(query), intervalSec * 1000);
-      alert(`自動更新を開始しました（${intervalSec}秒ごと）`);
+      //alert(`自動更新を開始しました（${intervalSec}秒ごと）`);
     }
 
     async function performSearch(query) {
