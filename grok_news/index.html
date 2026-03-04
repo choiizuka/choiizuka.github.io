@@ -2,64 +2,101 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Grokリアルタイム検索結果</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grokリアルタイム自動検索</title>
   <style>
-    body { font-family: sans-serif; margin: 20px; background: #f8f9fa; }
-    #results { border: 1px solid #ddd; padding: 15px; min-height: 200px; background: white; }
-    .loading { color: #666; font-style: italic; }
+    body { font-family: system-ui, sans-serif; margin: 20px; background: #f0f4f8; color: #333; }
+    h1 { color: #1a73e8; }
+    #query { font-size: 1.1em; padding: 8px; width: 400px; border: 1px solid #ccc; border-radius: 6px; }
+    #results { margin-top: 20px; border: 1px solid #ddd; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); min-height: 300px; }
+    .loading { color: #777; font-style: italic; text-align: center; padding: 40px 0; }
+    .error { color: #d93025; text-align: center; padding: 20px; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 12px 0; padding: 12px; background: #f8fafc; border-radius: 6px; border-left: 4px solid #1a73e8; }
+    li a { color: #1a73e8; text-decoration: none; font-weight: bold; }
+    li a:hover { text-decoration: underline; }
+    .snippet { color: #555; margin-top: 4px; font-size: 0.95em; }
+    .info { font-size: 0.9em; color: #666; margin: 10px 0; }
   </style>
 </head>
 <body>
-  <h1>Grokリアルタイム検索結果</h1>
+  <h1>Grokリアルタイム自動検索結果</h1>
 
-  <input type="text" id="query" placeholder="検索キーワードを入力" style="width:400px; padding:8px;">
-  <button onclick="search()">検索</button>
+  <label for="query">検索キーワード（URLに ?q=キーワード で自動検索可能）</label><br>
+  <input type="text" id="query" placeholder="検索キーワードを入力" style="margin: 10px 0; width:400px; padding:8px;">
 
-  <div id="results" class="loading">検索結果がここに表示されます…</div>
+  <div id="results" class="loading">検索を開始します…（自動更新: 60秒ごと）</div>
+
+  <p class="info">例: grok-search.html?q=最新のAIニュース で開くと自動検索開始</p>
 
   <script>
     let intervalId = null;
+    const UPDATE_INTERVAL = 60000; // 60秒（変更可能）
 
-    async function search(auto = false) {
-      const query = document.getElementById('query').value.trim();
-      if (!query) return alert('キーワードを入力してください');
+    async function performSearch(isAuto = false) {
+      const queryInput = document.getElementById('query');
+      let query = queryInput.value.trim();
+
+      // URLパラメーター優先（?q=xxx）
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlQuery = urlParams.get('q');
+      if (urlQuery) {
+        query = decodeURIComponent(urlQuery);
+        queryInput.value = query; // 入力欄にも反映
+      }
+
+      if (!query) {
+        document.getElementById('results').innerHTML = '<p class="error">キーワードを入力するか、URLに ?q=キーワード を付けてください</p>';
+        return;
+      }
 
       const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = '<div class="loading">検索中...</div>';
+      resultsDiv.innerHTML = '<div class="loading">Grokが検索中... 🚀</div>';
 
       try {
-        // Grokに検索を依頼（実際はここをAPI呼び出しに置き換え）
-        // 今はダミー結果でデモ
-        const dummyResults = await fakeGrokSearch(query);
+        // ここを本物のGrok APIに置き換え（今はダミー）
+        const results = await fakeGrokSearch(query);
 
-        // 結果をHTMLで整形
-        let html = `<h3>「${query}」の検索結果</h3><ul>`;
-        dummyResults.forEach(item => {
-          html += `<li><a href="${item.url}" target="_blank">${item.title}</a><br>${item.snippet}</li>`;
-        });
+        let html = `<h3>「${query}」の最新結果</h3><ul>`;
+        if (results.length === 0) {
+          html += '<li>該当結果なし…もう少し待ってみよう！</li>';
+        } else {
+          results.forEach(item => {
+            html += `
+              <li>
+                <a href="${item.url}" target="_blank">${item.title}</a>
+                <div class="snippet">${item.snippet}</div>
+              </li>`;
+          });
+        }
         html += '</ul>';
+        html += '<p class="info">最終更新: ' + new Date().toLocaleTimeString() + '（自動更新中）</p>';
 
         resultsDiv.innerHTML = html;
       } catch (e) {
-        resultsDiv.innerHTML = `<p style="color:red;">エラー: ${e.message}</p>`;
+        resultsDiv.innerHTML = `<p class="error">エラー: ${e.message}</p>`;
       }
 
-      // 自動更新（60秒ごと）
-      if (!auto && intervalId === null) {
-        intervalId = setInterval(() => search(true), 60000);
-        alert('自動更新を開始しました（60秒ごと）');
+      // 自動更新開始（初回のみ）
+      if (!intervalId) {
+        intervalId = setInterval(() => performSearch(true), UPDATE_INTERVAL);
       }
     }
 
-    // ダミー検索関数（実際はGrok API呼び出しに置き換え）
+    // ダミー検索関数（本番ではGrok APIに置き換え）
     async function fakeGrokSearch(query) {
-      await new Promise(r => setTimeout(r, 800)); // 遅延シミュレーション
+      await new Promise(r => setTimeout(r, 1200)); // 遅延シミュレーション
       return [
         { title: `${query} 公式サイト`, url: 'https://example.com', snippet: '最新情報が満載です' },
         { title: `${query} 解説記事`, url: 'https://news.example.jp', snippet: 'わかりやすくまとめました' },
-        { title: `${query} Wikipedia`, url: 'https://ja.wikipedia.org/wiki/' + encodeURIComponent(query), snippet: '百科事典的な説明' }
+        { title: `Grokが答える ${query}`, url: 'https://grok.x.ai', snippet: 'Grokのリアルタイム見解' }
       ];
     }
+
+    // ページ読み込み時に自動検索開始
+    window.onload = () => {
+      performSearch();
+    };
   </script>
 </body>
 </html>
