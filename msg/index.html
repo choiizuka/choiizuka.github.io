@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>告知バナー</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #000; }
+  .marquee-wrap {
+    background: linear-gradient(90deg, #1a0000, #2a0000, #1a0000);
+    border-top: 1px solid rgba(201,168,76,0.3);
+    border-bottom: 1px solid rgba(201,168,76,0.3);
+    overflow: hidden;
+    padding: 10px 0;
+    white-space: nowrap;
+  }
+  .marquee-wrap h1 {
+    display: inline-block;
+    font-family: 'Hiragino Kaku Gothic Pro', 'Noto Sans JP', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffd700;
+    text-shadow: 0 0 12px rgba(255,215,0,0.4);
+    letter-spacing: 0.08em;
+    animation: marquee var(--speed, 20s) linear infinite;
+    padding-left: 100%;
+  }
+  @keyframes marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+</style>
+</head>
+<body>
+
+<div class="marquee-wrap">
+  <h1 id="marquee-text"></h1>
+</div>
+
+<script>
+  const DEFAULT_TEXT = '📚 Kindleから書籍出版中！\u3000✅ Kindle Unlimited対象商品\u3000🏯 信長OS × 愛と平和\u3000👑 CHOIIZUKA著\u3000🌹 今すぐ読む → https://amzn.to/4aY25G3\u3000\u3000';
+
+  const params = new URLSearchParams(window.location.search);
+
+  // text: メインテキスト
+  const text  = params.get('text')  || DEFAULT_TEXT;
+
+  // speed: スクロール速度(秒) デフォルト20
+  const speed = params.get('speed') || '20';
+
+  // color: 文字色 デフォルト #ffd700
+  const color = params.get('color') || 'ffd700';
+
+  // bg: 背景色 デフォルト deep red
+  const bg    = params.get('bg')    || '1a0000';
+
+  // size: フォントサイズ(px) デフォルト18
+  const size  = params.get('size')  || '18';
+
+  const el = document.getElementById('marquee-text');
+  el.textContent = text;
+  el.style.setProperty('--speed', speed + 's');
+  el.style.color = '#' + color;
+  el.style.fontSize = size + 'px';
+
+  document.querySelector('.marquee-wrap').style.background =
+    'linear-gradient(90deg, #' + bg + ', #' + bg + 'aa, #' + bg + ')';
+</script>
+
+</body>
+</html>
