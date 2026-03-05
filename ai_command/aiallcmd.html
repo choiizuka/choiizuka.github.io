@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI軍団 一括命令システム</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --gold: #C9A84C;
+  --black: #070707; --panel: #0F0F0F;
+  --border: #1E1E1E; --text: #E8DCC8; --muted: #555;
+  --gemini: #4A90D9; --claude: #C9A84C; --copilot: #7B68EE;
+  --ok: #44AA66; --err: #CC4444; --run: #6688CC;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--black); color: var(--text);
+  font-family: 'Noto Serif JP', serif; min-height: 100vh;
+}
+
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none;
+  background: radial-gradient(ellipse 70% 35% at 50% 0%, rgba(201,168,76,0.05) 0%, transparent 55%);
+}
+
+.container { max-width: 680px; margin: 0 auto; padding: 40px 24px; position: relative; }
+
+.header { text-align: center; margin-bottom: 40px; }
+.crown { font-size: 36px; margin-bottom: 6px; }
+.title { font-size: 11px; letter-spacing: 6px; color: var(--gold); text-transform: uppercase; margin-bottom: 2px; }
+.subtitle { font-size: 10px; letter-spacing: 3px; color: var(--muted); }
+
+.section { margin-bottom: 20px; }
+.label {
+  font-size: 9px; letter-spacing: 4px; color: var(--gold);
+  text-transform: uppercase; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.label::after { content:''; flex:1; height:1px; background: var(--border); }
+
+input[type="text"] {
+  width: 100%; background: #0A0A0A; border: 1px solid var(--border);
+  color: var(--text); font-family: 'Share Tech Mono', monospace;
+  font-size: 12px; padding: 10px 14px; outline: none; transition: border-color 0.2s;
+}
+input:focus { border-color: var(--gold); }
+input::placeholder { color: #333; }
+
+.targets { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  font-family: 'Share Tech Mono', monospace; font-size: 10px;
+  letter-spacing: 1px; padding: 6px 16px; cursor: pointer;
+  border: 1px solid var(--border); color: var(--muted);
+  transition: all 0.15s; user-select: none;
+}
+.chip.active[data-ai="gemini"]  { border-color: var(--gemini);  color: var(--gemini);  background: rgba(74,144,217,0.1); }
+.chip.active[data-ai="claude"]  { border-color: var(--claude);  color: var(--claude);  background: rgba(201,168,76,0.1); }
+.chip.active[data-ai="copilot"] { border-color: var(--copilot); color: var(--copilot); background: rgba(123,104,238,0.1); }
+.chip.disabled { opacity: 0.3; cursor: not-allowed; }
+
+textarea {
+  width: 100%; background: #0A0A0A; border: 1px solid var(--border);
+  color: var(--text); font-family: 'Noto Serif JP', serif;
+  font-size: 14px; line-height: 1.8; padding: 14px 16px;
+  outline: none; resize: vertical; min-height: 200px; transition: border-color 0.2s;
+}
+textarea:focus { border-color: var(--gold); }
+
+.char-count { font-size: 10px; color: var(--muted); margin-top: 6px; text-align: right; font-family: 'Share Tech Mono', monospace; }
+
+.attach-row { display: flex; gap: 8px; }
+.attach-btn {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted); font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 2px; padding: 8px 14px;
+  cursor: pointer; opacity: 0.4; transition: opacity 0.15s;
+}
+.attach-btn:hover { opacity: 0.6; }
+
+.exec-btn {
+  width: 100%; background: transparent; border: 1px solid var(--gold);
+  color: var(--gold); font-family: 'Noto Serif JP', serif;
+  font-size: 13px; letter-spacing: 5px; padding: 16px;
+  cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; margin-top: 8px;
+}
+.exec-btn::before {
+  content:''; position:absolute; inset:0; background: var(--gold);
+  transform: translateX(-100%); transition: transform 0.3s; z-index:-1;
+}
+.exec-btn:hover { color: var(--black); letter-spacing: 7px; }
+.exec-btn:hover::before { transform: translateX(0); }
+.exec-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.exec-btn:disabled:hover { color: var(--gold); letter-spacing: 5px; }
+.exec-btn:disabled:hover::before { transform: translateX(-100%); }
+
+.status-area { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+.status-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border: 1px solid var(--border); background: var(--panel);
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+
+.status-ai { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 2px; font-weight: bold; width: 72px; }
+.status-ai.gemini  { color: var(--gemini); }
+.status-ai.claude  { color: var(--claude); }
+.status-ai.copilot { color: var(--copilot); }
+
+.status-badge { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 2px; padding: 3px 8px; }
+.badge-run { background: rgba(102,136,204,0.2); color: var(--run); }
+.badge-ok  { background: rgba(68,170,102,0.2);  color: var(--ok); }
+.badge-err { background: rgba(204,68,68,0.2);   color: var(--err); }
+
+.status-msg  { font-size: 11px; color: var(--muted); flex:1; font-family: 'Share Tech Mono', monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status-time { font-size: 9px; color: #444; font-family: 'Share Tech Mono', monospace; }
+
+.flash {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--gold); color: var(--black);
+  font-family: 'Share Tech Mono', monospace; font-size: 10px;
+  letter-spacing: 3px; padding: 10px 18px;
+  transform: translateY(60px); opacity:0; transition: all 0.3s; z-index:100;
+}
+.flash.show { transform: translateY(0); opacity:1; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="crown">👑</div>
+    <div class="title">AI軍団 一括命令システム</div>
+    <div class="subtitle">Nobunaga OS — Parallel Command Executor</div>
+  </div>
+
+
+
+  <div class="section">
+    <div class="label">🎯 送信先</div>
+    <div class="targets">
+      <div class="chip active" data-ai="gemini"  onclick="toggleChip(this)">Gemini</div>
+      <div class="chip active" data-ai="claude"  onclick="toggleChip(this)">Claude</div>
+      <div class="chip active" data-ai="copilot" onclick="toggleChip(this)">Copilot</div>
+      <div class="chip disabled" data-ai="grok"    title="準備中">Grok</div>
+      <div class="chip disabled" data-ai="chatgpt" title="準備中">ChatGPT</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">📋 命令</div>
+    <textarea id="cmd" placeholder="ここに命令を入力&#10;&#10;例：今日の予言を100文字で生成せよ。" onkeydown="handleKey(event)" oninput="updateCount()"></textarea>
+    <div class="char-count"><span id="char-count">0</span> 文字　｜　Ctrl+Enter で実行</div>
+  </div>
+
+  <div class="section">
+    <div class="label">📎 添付（将来実装予定）</div>
+    <div class="attach-row">
+      <button class="attach-btn" onclick="showFlash('画像添付は将来実装予定')">🖼 画像</button>
+      <button class="attach-btn" onclick="showFlash('ファイル添付は将来実装予定')">📄 ファイル</button>
+    </div>
+  </div>
+
+  <button class="exec-btn" id="exec-btn" onclick="executeAll()">⚔️ 全軍団に命令を送れ</button>
+
+  <div class="status-area" id="status-area"></div>
+
+</div>
+
+<div class="flash" id="flash"></div>
+
+<script>
+// ===== デフォルト設定（URLパラメーターで上書き可能）=====
+// 使い方: ?gemini_key=xxx&claude_key=yyy&webhook=zzz
+const p = new URLSearchParams(location.search);
+
+const CFG = {
+  gemini_key:       p.get('gemini_key')       || 'YOUR_GEMINI_KEY',
+  claude_key:       p.get('claude_key')        || 'YOUR_CLAUDE_KEY',
+  copilot_key:      p.get('copilot_key')       || 'YOUR_COPILOT_KEY',
+  copilot_endpoint: p.get('copilot_endpoint')  || 'YOUR_AZURE_ENDPOINT',
+  webhook:          p.get('webhook')            || '',
+};
+
+
+
+// ===== API設定 =====
+const AI = {
+  gemini: {
+    name: 'Gemini',
+    call: async (prompt) => {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${CFG.gemini_key}`,
+        { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{maxOutputTokens:2048} }) }
+      );
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error?.message || 'Gemini error');
+      return d.candidates?.[0]?.content?.parts?.[0]?.text || '(応答なし)';
+    }
+  },
+  claude: {
+    name: 'Claude',
+    call: async (prompt) => {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'x-api-key': CFG.claude_key,
+          'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+        body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:2048, messages:[{role:'user', content:prompt}] })
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error?.message || 'Claude error');
+      return d.content?.[0]?.text || '(応答なし)';
+    }
+  },
+  copilot: {
+    name: 'Copilot',
+    call: async (prompt) => {
+      if (!CFG.copilot_endpoint || CFG.copilot_endpoint === 'YOUR_AZURE_ENDPOINT')
+        throw new Error('copilot_endpoint未設定');
+      const res = await fetch(CFG.copilot_endpoint, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'api-key': CFG.copilot_key },
+        body: JSON.stringify({ messages:[{role:'user', content:prompt}], max_tokens:2048 })
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error?.message || 'Copilot error');
+      return d.choices?.[0]?.message?.content || '(応答なし)';
+    }
+  }
+};
+
+// ===== UI =====
+function toggleChip(el) {
+  if (el.classList.contains('disabled')) return;
+  el.classList.toggle('active');
+}
+function updateCount() {
+  document.getElementById('char-count').textContent =
+    document.getElementById('cmd').value.length.toLocaleString();
+}
+function handleKey(e) { if (e.ctrlKey && e.key === 'Enter') executeAll(); }
+
+// ===== 実行 =====
+async function executeAll() {
+  const prompt  = document.getElementById('cmd').value.trim();
+  const webhook = CFG.webhook;
+  const targets = [...document.querySelectorAll('.chip.active:not(.disabled)')].map(e => e.dataset.ai);
+
+  if (!prompt)         return showFlash('命令を入力してください');
+  if (!webhook)        return showFlash('webhook未設定（URLパラメーターで指定）');
+  if (!targets.length) return showFlash('送信先を選択してください');
+
+  document.getElementById('exec-btn').disabled = true;
+  document.getElementById('status-area').innerHTML = '';
+
+  await Promise.allSettled(targets.map(ai => runAI(ai, prompt, webhook)));
+
+  document.getElementById('exec-btn').disabled = false;
+}
+
+async function runAI(ai, prompt, webhook) {
+  const row = addRow(ai, 'run', 'RUNNING', '処理中...');
+  const start = Date.now();
+  try {
+    const result = await AI[ai].call(prompt);
+    const t = elapsed(start);
+    await sendWebhook(webhook, AI[ai].name, prompt, result);
+    updateRow(row, 'ok', 'SENT', 'Discordに送信完了', t);
+  } catch(err) {
+    updateRow(row, 'err', 'ERROR', err.message, elapsed(start));
+  }
+}
+
+async function sendWebhook(webhook, name, prompt, result) {
+  const content = `👑 **${name}** 応答\n\`\`\`\n命令: ${prompt.slice(0,100)}${prompt.length>100?'...':''}\n\`\`\`\n${result.slice(0,1800)}${result.length>1800?'...':''}`;
+  const res = await fetch(webhook, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ content })
+  });
+  if (!res.ok) throw new Error(`Webhook ${res.status}`);
+}
+
+function elapsed(start) { return ((Date.now()-start)/1000).toFixed(1)+'s'; }
+
+function addRow(ai, type, badge, msg) {
+  const area = document.getElementById('status-area');
+  const row = document.createElement('div');
+  row.className = 'status-row';
+  row.innerHTML = `
+    <div class="status-ai ${ai}">${AI[ai].name}</div>
+    <div class="status-badge badge-${type}">${badge}</div>
+    <div class="status-msg">${msg}</div>
+    <div class="status-time">--</div>`;
+  area.appendChild(row);
+  return row;
+}
+
+function updateRow(row, type, badge, msg, time) {
+  row.querySelector('.status-badge').className = `status-badge badge-${type}`;
+  row.querySelector('.status-badge').textContent = badge;
+  row.querySelector('.status-msg').textContent = msg;
+  row.querySelector('.status-time').textContent = time;
+}
+
+function showFlash(msg) {
+  const el = document.getElementById('flash');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
