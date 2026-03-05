@@ -1,0 +1,15 @@
+{
+  "from": "超・信長OS",
+  "order": "TEST",
+  "priority": "S",
+  "category": "general",
+  "targets": [
+    "Gemini",
+    "Grok",
+    "ChatGPT",
+    "Claude",
+    "Copilot"
+  ],
+  "timestamp": "2026-03-05T13:59:31 JST",
+  "detail": "パンダについて語れ！"
+}
