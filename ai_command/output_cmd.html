@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: transparent;
+    font-family: 'Noto Serif JP', 'Yu Mincho', serif;
+    overflow: hidden;
+  }
+
+  #panel {
+    display: none;
+    position: fixed;
+    bottom: 40px;
+    left: 40px;
+    max-width: 520px;
+    background: rgba(8, 8, 8, 0.92);
+    border: 1px solid #C9A84C;
+    border-left: 4px solid #C9A84C;
+    padding: 18px 22px;
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-12px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+
+  .fade-out { animation: fadeOut 0.6s ease forwards; }
+
+  .header {
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: #C9A84C;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .order {
+    font-size: 15px;
+    color: #F5F0E8;
+    font-weight: bold;
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+
+  .detail {
+    font-size: 12px;
+    color: #AAAAAA;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  .footer {
+    font-size: 10px;
+    color: #666;
+    letter-spacing: 2px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .priority-S { color: #FF4444; }
+  .priority-A { color: #C9A84C; }
+  .priority-B { color: #4488FF; }
+  .priority-C { color: #44AA44; }
+
+  .timer-bar {
+    height: 2px;
+    background: #222;
+    margin-top: 10px;
+  }
+
+  .timer-fill {
+    height: 100%;
+    background: #C9A84C;
+    width: 100%;
+    transition: width linear;
+  }
+</style>
+</head>
+<body>
+
+<div id="panel">
+  <div class="header">
+    <span>👑 AI軍団 司令受信</span>
+    <span id="priority-label"></span>
+  </div>
+  <div class="order" id="order-text"></div>
+  <div class="detail" id="detail-text"></div>
+  <div class="footer">
+    <span id="targets-text"></span>
+    <span id="timestamp-text"></span>
+  </div>
+  <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
+</div>
+
+<script>
+const JSON_URL = 'https://choiizuka.github.io/ai_command/cmd.json';
+const DISPLAY_MS = 3 * 60 * 1000; // 3分
+const POLL_MS = 10 * 1000;         // 10秒ごと確認
+
+let lastTimestamp = null;
+let hideTimer = null;
+
+async function poll() {
+  try {
+    const res = await fetch(JSON_URL + '?t=' + Date.now());
+    const data = await res.json();
+
+    if (data.timestamp && data.timestamp !== lastTimestamp) {
+      lastTimestamp = data.timestamp;
+      showPanel(data);
+    }
+  } catch(e) {}
+}
+
+function showPanel(data) {
+  const panel = document.getElementById('panel');
+
+  // テキスト更新
+  document.getElementById('order-text').textContent = data.order || '';
+  document.getElementById('detail-text').textContent = data.detail || '';
+  document.getElementById('timestamp-text').textContent = data.timestamp || '';
+
+  const p = data.priority || 'A';
+  const pl = document.getElementById('priority-label');
+  pl.textContent = `Priority ${p}`;
+  pl.className = 'priority-' + p;
+
+  const targets = Array.isArray(data.targets) ? data.targets.join(' · ') : (data.targets || '全軍団');
+  document.getElementById('targets-text').textContent = '→ ' + targets;
+
+  // 表示
+  panel.classList.remove('fade-out');
+  panel.style.display = 'block';
+
+  // タイマーバー
+  const fill = document.getElementById('timer-fill');
+  fill.style.transition = 'none';
+  fill.style.width = '100%';
+  setTimeout(() => {
+    fill.style.transition = `width ${DISPLAY_MS}ms linear`;
+    fill.style.width = '0%';
+  }, 50);
+
+  // 既存タイマーキャンセル
+  if (hideTimer) clearTimeout(hideTimer);
+
+  // 3分後に非表示
+  hideTimer = setTimeout(() => {
+    panel.classList.add('fade-out');
+    setTimeout(() => {
+      panel.style.display = 'none';
+      panel.classList.remove('fade-out');
+    }, 600);
+  }, DISPLAY_MS);
+}
+
+// 初回 + 定期ポーリング
+poll();
+setInterval(poll, POLL_MS);
+</script>
+</body>
+</html>
