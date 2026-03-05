@@ -173,7 +173,7 @@ textarea:focus { border-color: var(--gold); }
 <div class="flash" id="flash"></div>
 
 <div style="text-align:center;padding:40px 0 24px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:#222;">
-  AI軍団 一括命令システム　v1.0.0　— Nobunaga OS
+  AI軍団 一括命令システム　v1.1.0　— Nobunaga OS
 </div>
 
 <script>
@@ -187,6 +187,9 @@ const CFG = {
   copilot_key:      p.get('copilot_key')       || 'YOUR_COPILOT_KEY',
   copilot_endpoint: p.get('copilot_endpoint')  || 'YOUR_AZURE_ENDPOINT',
   webhook:          p.get('webhook')            || '',
+  github_token:     p.get('github_token')       || '',
+  github_repo:      p.get('github_repo')        || 'choiizuka/ai_command',
+  github_path:      p.get('github_path')        || 'cmd.json',
 };
 
 
@@ -278,13 +281,19 @@ async function executeAll() {
   const targets = [...document.querySelectorAll('.chip.active:not(.disabled)')].map(e => e.dataset.ai);
 
   if (!prompt)         return showFlash('命令を入力してください');
-  if (!webhook)        return showFlash('webhook未設定（URLパラメーターで指定）');
   if (!targets.length) return showFlash('送信先を選択してください');
 
   document.getElementById('exec-btn').disabled = true;
   document.getElementById('status-area').innerHTML = '';
 
-  await Promise.allSettled(targets.map(ai => runAI(ai, prompt, webhook)));
+  // cmd.json上書き（OBS表示用）
+  if (CFG.github_token) {
+    await updateCmdJson(prompt, targets);
+  }
+
+  if (webhook) {
+    await Promise.allSettled(targets.map(ai => runAI(ai, prompt, webhook)));
+  }
 
   document.getElementById('exec-btn').disabled = false;
 }
@@ -311,14 +320,57 @@ async function sendWebhook(webhook, name, prompt, result) {
   if (!res.ok) throw new Error(`Webhook ${res.status}`);
 }
 
+// ===== cmd.json上書き（GitHub API）=====
+async function updateCmdJson(prompt, targets) {
+  const row = addRow('obs', 'run', 'OBS', 'cmd.json更新中...');
+  try {
+    const apiUrl = `https://api.github.com/repos/${CFG.github_repo}/contents/${CFG.github_path}`;
+
+    // 現在のSHAを取得
+    const getRes = await fetch(apiUrl, {
+      headers: { 'Authorization': `Bearer ${CFG.github_token}`, 'Accept': 'application/vnd.github+json' }
+    });
+    const getData = await getRes.json();
+    const sha = getData.sha;
+
+    // 新しいcmd.json内容
+    const content = {
+      from: "超・信長OS",
+      order: prompt.slice(0, 100),
+      detail: prompt.length > 100 ? prompt : "",
+      priority: "A",
+      targets: targets,
+      timestamp: new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) + " JST",
+      category: "general"
+    };
+
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
+
+    // PUT
+    const putRes = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${CFG.github_token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github+json' },
+      body: JSON.stringify({ message: `cmd: ${prompt.slice(0, 50)}`, content: encoded, sha })
+    });
+
+    if (!putRes.ok) throw new Error(`GitHub API ${putRes.status}`);
+    updateRow(row, 'ok', 'OBS', 'cmd.json更新完了 → OBS反映待ち', '');
+  } catch(err) {
+    updateRow(row, 'err', 'OBS', `cmd.json更新失敗: ${err.message}`, '');
+  }
+}
+
 function elapsed(start) { return ((Date.now()-start)/1000).toFixed(1)+'s'; }
 
 function addRow(ai, type, badge, msg) {
   const area = document.getElementById('status-area');
   const row = document.createElement('div');
   row.className = 'status-row';
+  const name = AI[ai] ? AI[ai].name : ai.toUpperCase();
+  const colorMap = { gemini:'var(--gemini)', claude:'var(--claude)', copilot:'var(--copilot)', obs:'var(--gold)' };
+  const color = colorMap[ai] || 'var(--muted)';
   row.innerHTML = `
-    <div class="status-ai ${ai}">${AI[ai].name}</div>
+    <div class="status-ai" style="color:${color};width:72px;">${name}</div>
     <div class="status-badge badge-${type}">${badge}</div>
     <div class="status-msg">${msg}</div>
     <div class="status-time">--</div>`;
