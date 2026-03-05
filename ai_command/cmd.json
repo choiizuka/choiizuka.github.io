@@ -1,15 +1,11 @@
 {
   "from": "超・信長OS",
-  "order": "みんな大好き💕",
-  "priority": "S",
-  "category": "general",
+  "order": "🌹✨",
+  "detail": "",
+  "priority": "A",
   "targets": [
-    "Gemini",
-    "Grok",
-    "ChatGPT",
-    "Claude",
-    "Copilot"
+    "gemini"
   ],
-  "timestamp": "2026-03-05T18:34:34 JST",
-  "detail": "今AIによる自動予言プログラム開発中🧑‍💻🔮"
+  "timestamp": "2026/3/5 19:37:46 JST",
+  "category": "general"
 }
