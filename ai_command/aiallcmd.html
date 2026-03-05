@@ -240,6 +240,14 @@ const AI = {
 // ===== UI =====
 // 起動時：APIキー未設定のAIをグレーアウト
 window.addEventListener('DOMContentLoaded', () => {
+  // URLパラメーターにcmdがあれば自動実行
+  const autoCmd = p.get('cmd');
+  if (autoCmd) {
+    document.getElementById('cmd').value = autoCmd;
+    updateCount();
+    setTimeout(() => executeAll(), 300);
+  }
+
   const keyMap = { gemini: CFG.gemini_key, claude: CFG.claude_key, copilot: CFG.copilot_key };
   Object.entries(keyMap).forEach(([ai, key]) => {
     if (!key || key.startsWith('YOUR_')) {
