@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏯 AI軍団 司令送信システム</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --crimson: #8B0000;
+    --black: #080808;
+    --dark: #111111;
+    --panel: #161616;
+    --border: #2A2A2A;
+    --text: #E8DCC8;
+    --muted: #666;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Noto Serif JP', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* 背景装飾 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 100% 100%, rgba(139,0,0,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  /* ヘッダー */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .header::before, .header::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 25%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold));
+  }
+  .header::before { left: 0; }
+  .header::after { right: 0; background: linear-gradient(to left, transparent, var(--gold)); }
+
+  .crest {
+    font-size: 48px;
+    line-height: 1;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 20px rgba(201,168,76,0.4));
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(201,168,76,0.4)); }
+    50% { filter: drop-shadow(0 0 35px rgba(201,168,76,0.7)); }
+  }
+
+  .title {
+    font-size: 13px;
+    letter-spacing: 6px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--muted);
+  }
+
+  /* フォームカード */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--gold);
+    padding: 32px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+  }
+
+  .card-title {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* フォーム要素 */
+  .field {
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  input[type="text"], textarea, select {
+    width: 100%;
+    background: #0D0D0D;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 14px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input[type="text"]:focus, textarea:focus, select:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px rgba(201,168,76,0.2);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.6;
+  }
+
+  select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23C9A84C'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+  }
+
+  /* 優先度ボタン */
+  .priority-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .priority-btn {
+    flex: 1;
+    background: #0D0D0D;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .priority-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  .priority-btn.active-S { border-color: #FF4444; color: #FF4444; background: rgba(255,68,68,0.08); }
+  .priority-btn.active-A { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.08); }
+  .priority-btn.active-B { border-color: #4488FF; color: #4488FF; background: rgba(68,136,255,0.08); }
+  .priority-btn.active-C { border-color: #44AA44; color: #44AA44; background: rgba(68,170,68,0.08); }
+
+  /* ターゲット選択 */
+  .target-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .target-btn {
+    background: #0D0D0D;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .target-btn:hover { border-color: var(--gold); color: var(--text); }
+  .target-btn.selected { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.08); }
+  .target-btn.all-selected { border-color: var(--crimson); color: #FF6666; background: rgba(139,0,0,0.15); }
+
+  /* 生成ボタン */
+  .generate-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+
+  .generate-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: -1;
+  }
+
+  .generate-btn:hover {
+    color: var(--black);
+    letter-spacing: 6px;
+  }
+
+  .generate-btn:hover::before { transform: translateX(0); }
+
+  /* 出力エリア */
+  .output-area {
+    background: #050505;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    padding: 24px;
+    position: relative;
+  }
+
+  .output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .output-label {
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .copy-btn.copied { border-color: #44AA44; color: #44AA44; }
+
+  #output-json {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #E8DCC8;
+    white-space: pre;
+    overflow-x: auto;
+    min-height: 60px;
+  }
+
+  .json-key { color: var(--gold); }
+  .json-str { color: #88CCAA; }
+  .json-num { color: #88AAFF; }
+  .json-brace { color: var(--muted); }
+
+  /* AI一斉送信用テキスト */
+  .prompt-area {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .prompt-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  #output-prompt {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #AAAAAA;
+    white-space: pre-wrap;
+  }
+
+  /* 区切り線 */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 8px 0 24px;
+  }
+
+  /* フラッシュメッセージ */
+  .flash {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--gold);
+    color: var(--black);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 12px 20px;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 100;
+  }
+
+  .flash.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* 装飾角 */
+  .corner-tl, .corner-br {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-color: var(--gold);
+    border-style: solid;
+    opacity: 0.5;
+  }
+  .corner-tl { top: 8px; left: 8px; border-width: 1px 0 0 1px; }
+  .corner-br { bottom: 8px; right: 8px; border-width: 0 1px 1px 0; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ヘッダー -->
+  <div class="header">
+    <div class="crest">👑</div>
+    <div class="title">AI軍団 司令送信システム</div>
+    <div class="subtitle">Nobunaga OS — Command Generator</div>
+  </div>
+
+  <!-- 入力フォーム -->
+  <div class="card">
+    <div class="corner-tl"></div>
+    <div class="corner-br"></div>
+    <div class="card-title">🏯 司令内容</div>
+
+    <div class="field">
+      <label>司令（Order）</label>
+      <input type="text" id="order" placeholder="例：価値算定OSを今すぐ更新せよ" />
+    </div>
+
+    <div class="field">
+      <label>詳細（Detail） — 任意</label>
+      <textarea id="detail" placeholder="詳細な指示があれば記入"></textarea>
+    </div>
+
+    <div class="field">
+      <label>優先度（Priority）</label>
+      <div class="priority-group">
+        <button class="priority-btn" data-p="S" onclick="setPriority('S')">S — 最高緊急</button>
+        <button class="priority-btn active-A" data-p="A" onclick="setPriority('A')">A — 高</button>
+        <button class="priority-btn" data-p="B" onclick="setPriority('B')">B — 中</button>
+        <button class="priority-btn" data-p="C" onclick="setPriority('C')">C — 低</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>送信先（Target）</label>
+      <div class="target-group">
+        <button class="target-btn all-selected" id="btn-all" onclick="toggleAll()">👑 全軍団</button>
+        <button class="target-btn" id="btn-gemini" onclick="toggleTarget('gemini')">Gemini</button>
+        <button class="target-btn" id="btn-grok" onclick="toggleTarget('grok')">Grok</button>
+        <button class="target-btn" id="btn-chatgpt" onclick="toggleTarget('chatgpt')">ChatGPT</button>
+        <button class="target-btn" id="btn-claude" onclick="toggleTarget('claude')">Claude</button>
+        <button class="target-btn" id="btn-copilot" onclick="toggleTarget('copilot')">Copilot</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>カテゴリ（Category）</label>
+      <select id="category">
+        <option value="general">📋 General — 一般指令</option>
+        <option value="analysis">🧠 Analysis — 分析</option>
+        <option value="creative">✨ Creative — 創造</option>
+        <option value="technical">⚙️ Technical — 技術</option>
+        <option value="nagisa">🌹 Nagisa Protocol</option>
+        <option value="emergency">🚨 Emergency — 緊急</option>
+      </select>
+    </div>
+
+    <button class="generate-btn" onclick="generate()">⚔️ 司令JSON を生成せよ</button>
+  </div>
+
+  <!-- 出力エリア -->
+  <div class="output-area">
+    <div class="output-header">
+      <div class="output-label">📜 command.json 出力</div>
+      <button class="copy-btn" id="copy-json" onclick="copyJSON()">COPY JSON</button>
+    </div>
+    <div id="output-json"><span style="color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:12px;">// 司令を入力して生成ボタンを押せ</span></div>
+
+    <div class="prompt-area">
+      <div class="prompt-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div class="prompt-label">🤖 AI一斉送信用プロンプト</div>
+        <button class="copy-btn" id="copy-prompt" onclick="copyPrompt()">COPY PROMPT</button>
+      </div>
+      <div id="output-prompt" style="color:var(--muted);font-size:12px;">// JSONが生成されると自動で作成されます</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="flash" id="flash">COPIED</div>
+
+<script>
+let selectedPriority = 'A';
+let selectedTargets = new Set(['all']);
+
+function setPriority(p) {
+  selectedPriority = p;
+  document.querySelectorAll('.priority-btn').forEach(b => {
+    b.className = 'priority-btn';
+    if (b.dataset.p === p) b.classList.add('active-' + p);
+  });
+}
+
+function toggleAll() {
+  selectedTargets = new Set(['all']);
+  document.querySelectorAll('.target-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('btn-all').classList.add('all-selected');
+}
+
+function toggleTarget(name) {
+  selectedTargets.delete('all');
+  document.getElementById('btn-all').classList.remove('all-selected');
+
+  if (selectedTargets.has(name)) {
+    selectedTargets.delete(name);
+    document.getElementById('btn-' + name).classList.remove('selected');
+  } else {
+    selectedTargets.add(name);
+    document.getElementById('btn-' + name).classList.add('selected');
+  }
+
+  if (selectedTargets.size === 0) toggleAll();
+}
+
+function generate() {
+  const order = document.getElementById('order').value.trim();
+  if (!order) {
+    document.getElementById('order').focus();
+    document.getElementById('order').style.borderColor = '#FF4444';
+    setTimeout(() => document.getElementById('order').style.borderColor = '', 1000);
+    return;
+  }
+
+  const detail = document.getElementById('detail').value.trim();
+  const category = document.getElementById('category').value;
+  const now = new Date();
+  const ts = now.getFullYear() + '-' +
+    String(now.getMonth()+1).padStart(2,'0') + '-' +
+    String(now.getDate()).padStart(2,'0') + 'T' +
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0') + ':' +
+    String(now.getSeconds()).padStart(2,'0') + ' JST';
+
+  const targets = selectedTargets.has('all')
+    ? ['Gemini', 'Grok', 'ChatGPT', 'Claude', 'Copilot']
+    : [...selectedTargets].map(t => t.charAt(0).toUpperCase() + t.slice(1));
+
+  const json = {
+    from: '超・信長OS',
+    order: order,
+    priority: selectedPriority,
+    category: category,
+    targets: targets,
+    timestamp: ts,
+    ...(detail ? { detail: detail } : {})
+  };
+
+  // JSON整形表示
+  const jsonStr = JSON.stringify(json, null, 2);
+  const highlighted = jsonStr
+    .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
+    .replace(/: "([^"]+)"/g, ': <span class="json-str">"$1"</span>')
+    .replace(/: (\d+)/g, ': <span class="json-num">$1</span>')
+    .replace(/[{}[\]]/g, m => `<span class="json-brace">${m}</span>`);
+
+  document.getElementById('output-json').innerHTML = highlighted;
+
+  // AI送信用プロンプト生成
+  const targetStr = targets.join('、');
+  const prompt = `👑 超・信長OS より ${targetStr} へ\n\n以下のcommand.jsonを読み込み、即座に実行せよ。\n\n\`\`\`json\n${jsonStr}\n\`\`\`\n\n決めた、以上。`;
+  document.getElementById('output-prompt').textContent = prompt;
+
+  // アニメーション
+  document.querySelector('.output-area').style.borderLeftColor = '#E8C97A';
+  setTimeout(() => document.querySelector('.output-area').style.borderLeftColor = 'var(--gold)', 500);
+}
+
+function copyJSON() {
+  const el = document.getElementById('output-json');
+  const text = el.innerText;
+  if (!text || text.includes('//')) return;
+  navigator.clipboard.writeText(text);
+  showFlash('JSON COPIED');
+  const btn = document.getElementById('copy-json');
+  btn.textContent = 'COPIED ✓';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'COPY JSON'; btn.classList.remove('copied'); }, 2000);
+}
+
+function copyPrompt() {
+  const text = document.getElementById('output-prompt').textContent;
+  if (!text || text.includes('//')) return;
+  navigator.clipboard.writeText(text);
+  showFlash('PROMPT COPIED');
+  const btn = document.getElementById('copy-prompt');
+  btn.textContent = 'COPIED ✓';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'COPY PROMPT'; btn.classList.remove('copied'); }, 2000);
+}
+
+function showFlash(msg) {
+  const el = document.getElementById('flash');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// Enterキーで生成
+document.getElementById('order').addEventListener('keydown', e => {
+  if (e.key === 'Enter') generate();
+});
+</script>
+</body>
+</html>
