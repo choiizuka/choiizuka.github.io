@@ -1,11 +1,11 @@
 {
   "from": "超・信長OS",
-  "order": "Admix-Rexモード起動\nGeminiよ聞こえるか?",
+  "order": "🛁",
   "detail": "",
   "priority": "A",
   "targets": [
     "gemini"
   ],
-  "timestamp": "2026/3/6 12:53:29 JST",
+  "timestamp": "2026/3/6 13:12:07 JST",
   "category": "general"
 }
