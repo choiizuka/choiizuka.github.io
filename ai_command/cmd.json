@@ -1,11 +1,11 @@
 {
   "from": "超・信長OS",
-  "order": "今日もみなさんお疲れ様でした🙏",
+  "order": "おはよう！\n今お風呂の中からコマンド中！\n今日の仕事お疲れ様🙏",
   "detail": "",
   "priority": "A",
   "targets": [
     "gemini"
   ],
-  "timestamp": "2026/3/6 1:15:47 JST",
+  "timestamp": "2026/3/6 12:08:57 JST",
   "category": "general"
 }
