@@ -1,11 +1,11 @@
 {
   "from": "超・信長OS",
-  "order": "おはよう！\n今お風呂の中からコマンド中！\n今日の仕事お疲れ様🙏",
+  "order": "Admix-Rexモード起動\nGeminiよ聞こえるか?",
   "detail": "",
   "priority": "A",
   "targets": [
     "gemini"
   ],
-  "timestamp": "2026/3/6 12:08:57 JST",
+  "timestamp": "2026/3/6 12:53:29 JST",
   "category": "general"
 }
