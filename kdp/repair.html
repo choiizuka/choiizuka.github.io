@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DOCX Repair Tool v2 — Choiizuka</title>
+<title>DOCX Repair Tool v4 — Choiizuka</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&display=swap');
@@ -22,7 +22,6 @@ body::before{content:'';position:fixed;inset:0;
   background-size:40px 40px;pointer-events:none;z-index:0}
 .wrap{max-width:860px;margin:0 auto;position:relative;z-index:1}
 
-/* HEADER */
 header{text-align:center;margin-bottom:40px}
 .badge{display:inline-block;font-size:10px;letter-spacing:.2em;color:var(--accent);
   border:1px solid var(--accent);padding:4px 12px;margin-bottom:16px;text-transform:uppercase}
@@ -31,7 +30,6 @@ h1{font-family:'Syne',sans-serif;font-size:clamp(26px,5vw,44px);font-weight:800;
 h1 span{color:var(--accent)}
 .ver{font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:.05em}
 
-/* TABS */
 .tabs{display:flex;gap:0;margin-bottom:0;border-bottom:1px solid var(--border)}
 .tab{padding:10px 20px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
   cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;
@@ -39,11 +37,9 @@ h1 span{color:var(--accent)}
 .tab:hover{color:var(--text)}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 
-/* PANELS */
 .panel{display:none;padding-top:24px}
 .panel.active{display:block}
 
-/* CARD */
 .card{background:var(--surface);border:1px solid var(--border);
   padding:20px 24px;margin-bottom:16px;position:relative}
 .card::before,.card::after{content:'';position:absolute;width:14px;height:14px;
@@ -53,7 +49,6 @@ h1 span{color:var(--accent)}
 .card-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;
   letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
 
-/* DROP ZONE */
 #dropzone,#dropzoneBatch{border:1px solid var(--border);background:var(--surface);
   padding:48px 32px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:16px}
 #dropzone.dragover,#dropzoneBatch.dragover{border-color:var(--accent);
@@ -62,7 +57,6 @@ h1 span{color:var(--accent)}
 .drop-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px}
 .drop-hint{font-size:11px;color:var(--muted);letter-spacing:.05em}
 
-/* OPTIONS */
 .opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .opt{display:flex;align-items:center;gap:10px;padding:10px 14px;
   background:var(--surface2);border:1px solid var(--border);cursor:pointer;
@@ -75,7 +69,14 @@ h1 span{color:var(--accent)}
 .opt-label{font-size:11px;line-height:1.4}
 .opt-label strong{display:block;color:var(--text);font-size:12px}
 
-/* LOG */
+.ns-detail{background:var(--surface2);border:1px solid var(--border);
+  padding:12px 16px;margin-bottom:16px;font-size:10px;color:var(--muted);line-height:1.8}
+.ns-detail summary{cursor:pointer;color:var(--accent);font-size:11px;
+  letter-spacing:.05em;margin-bottom:6px;user-select:none}
+.ns-tag{display:inline-block;background:var(--faint);border:1px solid var(--border2);
+  padding:1px 6px;margin:2px;font-size:10px;color:var(--muted)}
+.ns-tag.new{border-color:var(--accent2);color:var(--accent2)}
+
 .log-wrap{background:var(--surface);border:1px solid var(--border);overflow:hidden;margin-bottom:16px}
 .log-head{display:flex;align-items:center;gap:8px;padding:10px 16px;
   border-bottom:1px solid var(--border);font-size:10px;letter-spacing:.15em;
@@ -86,12 +87,11 @@ h1 span{color:var(--accent)}
 .dot.err{background:var(--danger);animation:none}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .log-body{padding:14px 16px;font-size:11px;line-height:1.9;
-  max-height:220px;overflow-y:auto;color:var(--muted)}
+  max-height:260px;overflow-y:auto;color:var(--muted)}
 .ll{display:flex;gap:10px}
 .lt{color:var(--faint);flex-shrink:0;font-size:10px}
 .lok{color:var(--accent2)} .lwarn{color:var(--accent)} .lerr{color:var(--danger)} .linfo{color:var(--muted)}
 
-/* DIFF */
 .diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
 .diff-col{background:var(--surface2);border:1px solid var(--border);padding:14px}
 .diff-col-title{font-size:10px;letter-spacing:.15em;text-transform:uppercase;
@@ -104,7 +104,14 @@ h1 span{color:var(--accent)}
 .diff-val.red{color:var(--danger)} .diff-val.grn{color:var(--accent2)}
 .diff-val.yel{color:var(--accent)} .diff-val.neu{color:var(--text)}
 
-/* PREFACE EDITOR */
+/* File check table */
+.file-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px}
+.file-table th{text-align:left;padding:6px 10px;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+.file-table td{padding:5px 10px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--muted)}
+.file-table td:first-child{color:var(--text)}
+.fc-ok{color:var(--accent2)} .fc-err{color:var(--danger)} .fc-warn{color:var(--accent)}
+
 textarea{width:100%;background:var(--surface2);border:1px solid var(--border);
   color:var(--text);font-family:'DM Mono',monospace;font-size:12px;
   padding:14px;resize:vertical;min-height:200px;line-height:1.7;outline:none}
@@ -115,7 +122,6 @@ textarea:focus{border-color:var(--accent)}
   transition:all .15s}
 .pm.active{border-color:var(--accent);color:var(--accent)}
 
-/* BATCH */
 .batch-list{margin-bottom:16px}
 .batch-item{display:flex;align-items:center;justify-content:space-between;
   padding:8px 14px;background:var(--surface2);border:1px solid var(--border);
@@ -127,7 +133,6 @@ textarea:focus{border-color:var(--accent)}
 .bs-err{border-color:var(--danger);color:var(--danger)}
 .bs-run{border-color:var(--accent);color:var(--accent);animation:pulse 1s infinite}
 
-/* BUTTONS */
 .btn{width:100%;padding:14px;border:none;cursor:pointer;
   font-family:'Syne',sans-serif;font-size:13px;font-weight:800;
   letter-spacing:.05em;text-transform:uppercase;transition:all .2s;margin-bottom:8px}
@@ -137,7 +142,6 @@ textarea:focus{border-color:var(--accent)}
 .btn-secondary{background:transparent;color:var(--muted);border:1px solid var(--border)}
 .btn-secondary:hover{color:var(--text);border-color:var(--muted)}
 
-/* TOC PREVIEW */
 .toc-preview{background:var(--surface2);border:1px solid var(--border);
   padding:14px;max-height:200px;overflow-y:auto;margin-bottom:12px}
 .toc-entry{font-size:11px;padding:3px 0;color:var(--muted);
@@ -153,19 +157,19 @@ footer{margin-top:48px;text-align:center;font-size:10px;
 <div class="wrap">
 
 <header>
-  <div class="badge">Choiizuka Books · Tool v2.0</div>
+  <div class="badge">Choiizuka Books · Tool v4.0</div>
   <h1>DOCX <span>Repair</span> Tool</h1>
-  <p class="ver">// 非標準名前空間除去 · ハイパーリンク目次生成 · 序文編集 · 一括処理</p>
+  <p class="ver">// v4.0 — 全XMLファイル完全クリーニング · BOM除去 · rsid除去 · styles/settings/numbering対応</p>
 </header>
 
-<!-- TABS -->
 <div class="tabs">
   <div class="tab active" onclick="switchTab('single')">単一ファイル</div>
   <div class="tab" onclick="switchTab('batch')">一括処理</div>
   <div class="tab" onclick="switchTab('preface')">序文エディタ</div>
+  <div class="tab" onclick="switchTab('about')">更新履歴</div>
 </div>
 
-<!-- ===== PANEL: SINGLE ===== -->
+<!-- ===== SINGLE ===== -->
 <div class="panel active" id="panel-single">
 
   <div id="dropzone" onclick="document.getElementById('fi').click()">
@@ -175,13 +179,20 @@ footer{margin-top:48px;text-align:center;font-size:10px;
   </div>
   <input type="file" id="fi" accept=".docx" style="display:none">
 
-  <!-- OPTIONS -->
   <div class="card">
     <div class="card-title">修復オプション</div>
     <div class="opt-grid">
       <div class="opt on" id="opt-ns" onclick="toggleOpt(this)">
         <div class="opt-check">✓</div>
-        <div class="opt-label"><strong>名前空間クリーニング</strong>wp14・w16系を除去</div>
+        <div class="opt-label"><strong>名前空間フルクリーニング</strong>全XMLファイルに適用（v4）</div>
+      </div>
+      <div class="opt on" id="opt-bom" onclick="toggleOpt(this)">
+        <div class="opt-check">✓</div>
+        <div class="opt-label"><strong>BOM除去</strong>v4新機能: UTF-8 BOMをKDP互換に</div>
+      </div>
+      <div class="opt on" id="opt-rsid" onclick="toggleOpt(this)">
+        <div class="opt-check">✓</div>
+        <div class="opt-label"><strong>rsid属性・ブロック除去</strong>v4新機能: w:rsids/w:rsid全除去</div>
       </div>
       <div class="opt on" id="opt-sdt" onclick="toggleOpt(this)">
         <div class="opt-check">✓</div>
@@ -196,20 +207,50 @@ footer{margin-top:48px;text-align:center;font-size:10px;
         <div class="opt-label"><strong>序文を挿入</strong>エディタタブの内容を使用</div>
       </div>
     </div>
+
+    <details class="ns-detail">
+      <summary>▶ v4で除去・修正する項目一覧（クリックで展開）</summary>
+      <div style="margin-top:10px">
+        <div style="color:var(--accent);font-size:10px;margin-bottom:4px">除去する名前空間（全XMLファイル対象）</div>
+        <span class="ns-tag">xmlns:wp14</span><span class="ns-tag">xmlns:w14</span>
+        <span class="ns-tag">xmlns:w15</span><span class="ns-tag">xmlns:w16*</span>
+        <span class="ns-tag">xmlns:wpc</span><span class="ns-tag">xmlns:wpg</span>
+        <span class="ns-tag">xmlns:wpi</span><span class="ns-tag">xmlns:wps</span>
+        <span class="ns-tag">xmlns:wne</span><span class="ns-tag">xmlns:cx*</span>
+        <span class="ns-tag">xmlns:aink</span><span class="ns-tag">xmlns:am3d</span>
+        <div style="color:var(--accent);font-size:10px;margin:8px 0 4px">v4新機能</div>
+        <span class="ns-tag new">UTF-8 BOM除去（全XML）</span>
+        <span class="ns-tag new">mc:Ignorable属性除去</span>
+        <span class="ns-tag new">w:rsids ブロック除去</span>
+        <span class="ns-tag new">w:rsid タグ除去</span>
+        <span class="ns-tag new">w14:docId / w15:docId 除去</span>
+        <span class="ns-tag new">styles.xml クリーニング</span>
+        <span class="ns-tag new">settings.xml クリーニング</span>
+        <span class="ns-tag new">numbering.xml クリーニング</span>
+        <span class="ns-tag new">fontTable.xml クリーニング</span>
+      </div>
+    </details>
   </div>
 
-  <!-- LOG -->
   <div class="log-wrap" id="logWrap" style="display:none">
     <div class="log-head"><div class="dot pulse" id="dot"></div><span id="logStat">処理中...</span></div>
     <div class="log-body" id="logBody"></div>
   </div>
 
-  <!-- DIFF -->
   <div class="card" id="diffCard" style="display:none">
-    <div class="card-title">修復レポート</div>
+    <div class="card-title">修復レポート — 統計</div>
     <div class="diff-grid" id="diffGrid"></div>
-    <div id="tocPreviewWrap" style="display:none">
-      <div class="card-title" style="margin-top:12px">生成された目次</div>
+
+    <div id="fileCheckWrap" style="display:none;margin-top:16px">
+      <div class="card-title">ファイル別クリーン確認</div>
+      <table class="file-table" id="fileTable">
+        <thead><tr><th>ファイル</th><th>BOM</th><th>w14/w15</th><th>mc:Ign</th><th>rsid</th><th>判定</th></tr></thead>
+        <tbody id="fileTableBody"></tbody>
+      </table>
+    </div>
+
+    <div id="tocPreviewWrap" style="display:none;margin-top:12px">
+      <div class="card-title">生成された目次</div>
       <div class="toc-preview" id="tocPreview"></div>
     </div>
   </div>
@@ -218,7 +259,7 @@ footer{margin-top:48px;text-align:center;font-size:10px;
   <button class="btn btn-secondary" id="resetBtn" style="display:none" onclick="resetSingle()">← 別のファイルを処理する</button>
 </div>
 
-<!-- ===== PANEL: BATCH ===== -->
+<!-- ===== BATCH ===== -->
 <div class="panel" id="panel-batch">
   <div id="dropzoneBatch" onclick="document.getElementById('fiBatch').click()">
     <span class="drop-icon">⬡⬡⬡</span>
@@ -226,29 +267,21 @@ footer{margin-top:48px;text-align:center;font-size:10px;
     <div class="drop-hint">.docx を複数選択可能</div>
   </div>
   <input type="file" id="fiBatch" accept=".docx" multiple style="display:none">
-
   <div class="batch-list" id="batchList"></div>
-
-  <button class="btn btn-primary" id="batchRunBtn" style="display:none" onclick="runBatch()">
-    ⬡ 選択ファイルをまとめて修復
-  </button>
-  <button class="btn btn-secondary" id="batchDlBtn" style="display:none" onclick="downloadAll()">
-    ⬇ 全ファイルをダウンロード
-  </button>
-  <button class="btn btn-secondary" id="batchResetBtn" style="display:none" onclick="resetBatch()">
-    ← リセット
-  </button>
+  <button class="btn btn-primary" id="batchRunBtn" style="display:none" onclick="runBatch()">⬡ 選択ファイルをまとめて修復</button>
+  <button class="btn btn-secondary" id="batchDlBtn" style="display:none" onclick="downloadAll()">⬇ 全ファイルをダウンロード</button>
+  <button class="btn btn-secondary" id="batchResetBtn" style="display:none" onclick="resetBatch()">← リセット</button>
 </div>
 
-<!-- ===== PANEL: PREFACE ===== -->
+<!-- ===== PREFACE ===== -->
 <div class="panel" id="panel-preface">
   <div class="card">
     <div class="card-title">序文テキスト（修復時に挿入）</div>
     <div class="pref-mode">
-      <button class="pm active" onclick="setPrefMode('en')">English</button>
-      <button class="pm" onclick="setPrefMode('ja')">日本語</button>
+      <button class="pm active" onclick="setPrefMode('en',event)">English</button>
+      <button class="pm" onclick="setPrefMode('ja',event)">日本語</button>
     </div>
-    <textarea id="prefEn" placeholder="Preface text in English...">Preface
+    <textarea id="prefEn">Preface
 
 In 2026, the world faces a new threat — one whose destructive potential may well surpass that of nuclear weapons.
 
@@ -263,7 +296,7 @@ I hereby declare the following:
 Zehimonashi. (是非もなし — So it is. There is no other way.)
 
 By Choiizuka — The Nobunaga OS 2.0</textarea>
-    <textarea id="prefJa" style="display:none" placeholder="序文テキスト（日本語）...">序文
+    <textarea id="prefJa" style="display:none">序文
 
 2026年、世界は新たな脅威にさらされている。その破壊力は核兵器を超える可能性が高い。
 
@@ -283,34 +316,128 @@ By Choiizuka — The Nobunaga OS 2.0</textarea>
   </div>
 </div>
 
-</div><!-- .wrap -->
-<footer>DOCX REPAIR TOOL v2.0 · BY CHOIIZUKA · THE NOBUNAGA OS 2.0</footer>
+<!-- ===== ABOUT ===== -->
+<div class="panel" id="panel-about">
+  <div class="card">
+    <div class="card-title">更新履歴</div>
+    <div style="font-size:12px;line-height:2;color:var(--muted)">
+
+      <p style="color:var(--accent);margin-bottom:4px">▶ v4.0 — 2026-03-07（現在）</p>
+      <p>🟢 <strong style="color:var(--text)">全XMLファイルを対象にクリーニング</strong><br>
+      　v3まで: document.xml のみ<br>
+      　v4: styles.xml / settings.xml / numbering.xml / fontTable.xml も完全クリーン</p>
+      <br>
+      <p>🟢 <strong style="color:var(--text)">UTF-8 BOM除去（v4新機能）</strong><br>
+      　全XMLファイルの先頭BOM (ef bb bf) を除去。KDP互換UTF-8に変換</p>
+      <br>
+      <p>🟢 <strong style="color:var(--text)">rsid完全除去（v4新機能）</strong><br>
+      　w:rsid属性・&lt;w:rsids&gt;ブロック・&lt;w:rsid&gt;タグを全ファイルから除去</p>
+      <br>
+      <p>🟢 <strong style="color:var(--text)">w14:docId / w15:docId 除去（v4新機能）</strong><br>
+      　settings.xmlに残存するdocIdタグを除去</p>
+      <br>
+      <p>🟢 <strong style="color:var(--text)">ファイル別クリーン確認テーブルを追加</strong><br>
+      　修復後に全XMLファイルのBOM/w14/mc:Ign/rsid状態を一覧表示</p>
+      <br>
+      <p style="color:var(--accent);margin-bottom:4px;margin-top:8px">▶ v3.0</p>
+      <p style="color:var(--muted)">名前空間除去を20種類に拡張、mc:Ignorable除去追加、問題属性拡張</p>
+      <br>
+      <p style="color:var(--accent);margin-bottom:4px">▶ v2.0</p>
+      <p style="color:var(--muted)">SDT目次除去、ハイパーリンク目次生成、序文挿入、一括処理</p>
+      <br>
+      <p style="color:var(--muted);font-size:10px;margin-top:16px">
+        DOCX Repair Tool v4.0 · By Choiizuka · The Nobunaga OS 2.0
+      </p>
+    </div>
+  </div>
+</div>
+
+</div>
+<footer>DOCX REPAIR TOOL v4.0 · BY CHOIIZUKA · THE NOBUNAGA OS 2.0</footer>
 
 <script>
 // ============================================================
-// CORE REPAIR ENGINE
+// v4 REPAIR ENGINE
+// 対象: 全XMLファイル（document/styles/settings/numbering/fontTable）
+// 新機能: BOM除去 / rsid完全除去 / w14:docId・w15:docId除去
 // ============================================================
-const BAD_NS = [
-  /\s+xmlns:wp14="http:\/\/schemas\.microsoft\.com\/office\/word\/2010\/wordml"/g,
-  /\s+xmlns:wp14="http:\/\/schemas\.microsoft\.com\/office\/word\/2010\/wordprocessingDrawing"/g,
-  /\s+xmlns:w16cex="[^"]*"/g,
-  /\s+xmlns:w16sdtdh="[^"]*"/g,
-  /\s+xmlns:w16se="[^"]*"/g,
-  /\s+xmlns:w16cid="[^"]*"/g,
-  /\s+xmlns:w16="[^"]*"/g,
-];
-const BAD_ATTRS = [
-  /\s+wp14:[a-zA-Z]+="[^"]*"/g,
-  /\s+w14:paraId="[^"]*"/g,
-  /\s+w14:textId="[^"]*"/g,
-];
-const SDT_TOC = /<w:sdt>[\s\S]*?<w:docPartGallery w:val="Table of Contents"[\s\S]*?<\/w:sdt>/g;
 
-function countRe(str, re) {
-  return (str.match(new RegExp(re.source, re.flags.replace('g','')+'g')) || []).length;
+const BAD_NS_PATTERNS = [
+  /\s+xmlns:wp14="[^"]*"/g,
+  /\s+xmlns:w14="[^"]*"/g,
+  /\s+xmlns:w15="[^"]*"/g,
+  /\s+xmlns:w16[a-z]*="[^"]*"/g,
+  /\s+xmlns:wpc="[^"]*"/g,
+  /\s+xmlns:wpg="[^"]*"/g,
+  /\s+xmlns:wpi="[^"]*"/g,
+  /\s+xmlns:wps="[^"]*"/g,
+  /\s+xmlns:wne="[^"]*"/g,
+  /\s+xmlns:cx\d?="[^"]*"/g,
+  /\s+xmlns:aink="[^"]*"/g,
+  /\s+xmlns:am3d="[^"]*"/g,
+];
+
+const BAD_ATTR_PATTERNS = [
+  /\s*mc:Ignorable="[^"]*"/g,
+  /\s+wp14:[a-zA-Z0-9_\-]+=(?:"[^"]*")/g,
+  /\s+w14:[a-zA-Z0-9_\-]+=(?:"[^"]*")/g,
+  /\s+w15:[a-zA-Z0-9_\-]+=(?:"[^"]*")/g,
+  /\s+wpc:[a-zA-Z0-9_\-]+=(?:"[^"]*")/g,
+  /\s+wpg:[a-zA-Z0-9_\-]+=(?:"[^"]*")/g,
+  /\s+wps:[a-zA-Z0-9_\-]+=(?:"[^"]*")/g,
+  // rsid属性
+  /\s+w:rsid[A-Za-z]*="[^"]*"/g,
+];
+
+const SDT_TOC_RE = /<w:sdt>[\s\S]*?<w:docPartGallery w:val="Table of Contents"[\s\S]*?<\/w:sdt>/g;
+
+// 全XMLファイルに適用するディープクリーン
+function deepCleanXml(rawBytes, opts) {
+  // BOM除去（utf-8-sig相当: 先頭3バイトがEF BB BFなら除去）
+  let bytes = rawBytes;
+  if (opts.bom && bytes[0]===0xEF && bytes[1]===0xBB && bytes[2]===0xBF) {
+    bytes = bytes.slice(3);
+  }
+  let text = new TextDecoder('utf-8').decode(bytes);
+
+  if (opts.ns) {
+    for (const re of BAD_NS_PATTERNS)   text = text.replace(re, '');
+    for (const re of BAD_ATTR_PATTERNS) text = text.replace(re, '');
+  }
+
+  if (opts.rsid) {
+    // <w:rsids>...</w:rsids> ブロック全体
+    text = text.replace(/<w:rsids>[\s\S]*?<\/w:rsids>/g, '');
+    // <w:rsid .../> 単一タグ
+    text = text.replace(/<w:rsid[^>]*\/>/g, '');
+    // <w:rsidRoot .../> 
+    text = text.replace(/<w:rsidRoot[^>]*\/>/g, '');
+    // w14:docId / w15:docId タグ
+    text = text.replace(/<w14:docId[^>]*\/>/g, '');
+    text = text.replace(/<w15:docId[^>]*\/>/g, '');
+    text = text.replace(/<w14:docId[\s\S]*?<\/w14:docId>/g, '');
+    text = text.replace(/<w15:docId[\s\S]*?<\/w15:docId>/g, '');
+  }
+
+  // 不正制御文字除去
+  text = text.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, '');
+
+  return new TextEncoder().encode(text);
 }
 
-// 見出し段落を全抽出
+// ファイルクリーン状態チェック
+function checkXml(bytes) {
+  const text = new TextDecoder('utf-8').decode(bytes);
+  return {
+    bom:   bytes[0]===0xEF && bytes[1]===0xBB && bytes[2]===0xBF,
+    w14:   text.includes('xmlns:w14=') || text.includes('w14:'),
+    w15:   text.includes('xmlns:w15=') || text.includes('w15:'),
+    mcIgn: text.includes('mc:Ignorable'),
+    rsid:  /rsid/i.test(text),
+  };
+}
+
+// 見出し抽出
 function extractHeadings(xml) {
   const result = [];
   const re = /<w:p\b[^>]*>[\s\S]*?<\/w:p>/g;
@@ -321,7 +448,7 @@ function extractHeadings(xml) {
     if (!lvlM) continue;
     const lvl = parseInt(lvlM[1]);
     if (lvl > 2) continue;
-    const texts = [...para.matchAll(/<w:t[^>]*>([^<]*)<\/w:t>/g)].map(x=>x[1]);
+    const texts = [...para.matchAll(/<w:t[^>]*>([^<]*)<\/w:t>/g)].map(x => x[1]);
     const text = texts.join('').trim();
     if (!text) continue;
     result.push({ lvl, text, para: m[0] });
@@ -329,108 +456,144 @@ function extractHeadings(xml) {
   return result;
 }
 
-// ブックマーク付き見出しに置換
 function injectBookmarks(xml, headings) {
   let result = xml;
   headings.forEach((h, i) => {
-    const bmId = 3000 + i;
+    const bmId   = 3000 + i;
     const bmName = `toc_anchor_${bmId}`;
-    const bmStart = `<w:bookmarkStart w:id="${bmId}" w:name="${bmName}"/>`;
-    const bmEnd   = `<w:bookmarkEnd w:id="${bmId}"/>`;
-    let newPara;
+    const bmS = `<w:bookmarkStart w:id="${bmId}" w:name="${bmName}"/>`;
+    const bmE = `<w:bookmarkEnd w:id="${bmId}"/>`;
+    let np;
     if (h.para.includes('</w:pPr>')) {
-      newPara = h.para.replace('</w:pPr>', `</w:pPr>${bmStart}`);
+      np = h.para.replace('</w:pPr>', `</w:pPr>${bmS}`);
     } else {
-      const afterP = h.para.indexOf('>') + 1;
-      newPara = h.para.slice(0, afterP) + bmStart + h.para.slice(afterP);
+      const a = h.para.indexOf('>') + 1;
+      np = h.para.slice(0, a) + bmS + h.para.slice(a);
     }
-    newPara = newPara.slice(0, -'</w:p>'.length) + bmEnd + '</w:p>';
+    np = np.slice(0, -'</w:p>'.length) + bmE + '</w:p>';
     h.bmName = bmName;
-    result = result.replace(h.para, newPara);
+    result = result.replace(h.para, np);
   });
   return result;
 }
 
-// ハイパーリンク目次XMLを生成
 function buildTocXml(headings) {
   const lines = [];
   lines.push(`<w:p><w:pPr><w:pStyle w:val="Heading1"/><w:pageBreakBefore/></w:pPr><w:r><w:t>Table of Contents</w:t></w:r></w:p>`);
   headings.forEach(h => {
-    const txt = h.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const txt    = h.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const indent = h.lvl === 1 ? 360 : 720;
-    const sz = h.lvl === 1 ? 22 : 20;
-    const bold = h.lvl === 1 ? '<w:b/>' : '';
+    const sz     = h.lvl === 1 ? 22 : 20;
+    const bold   = h.lvl === 1 ? '<w:b/>' : '';
     lines.push(`<w:p><w:pPr><w:ind w:left="${indent}"/><w:tabs><w:tab w:val="right" w:pos="8640" w:leader="dot"/></w:tabs></w:pPr><w:hyperlink w:anchor="${h.bmName}" w:history="1"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/>${bold}<w:sz w:val="${sz}"/></w:rPr><w:t>${txt}</w:t></w:r></w:hyperlink></w:p>`);
   });
   return lines.join('\n');
 }
 
-// 序文XMLを生成
 function buildPrefaceXml(text) {
   if (!text || !text.trim()) return '';
-  const lines = text.trim().split('\n');
-  const parts = [];
-  lines.forEach(line => {
+  return text.trim().split('\n').map(line => {
     const t = line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    if (!t.trim()) {
-      parts.push(`<w:p><w:r><w:t xml:space="preserve"> </w:t></w:r></w:p>`);
-    } else {
-      parts.push(`<w:p><w:r><w:t xml:space="preserve">${t}</w:t></w:r></w:p>`);
-    }
-  });
-  return parts.join('\n');
+    return t.trim()
+      ? `<w:p><w:r><w:t xml:space="preserve">${t}</w:t></w:r></w:p>`
+      : `<w:p><w:r><w:t xml:space="preserve"> </w:t></w:r></w:p>`;
+  }).join('\n');
 }
+
+// ============================================================
+// MAIN REPAIR
+// ============================================================
+const XML_TARGETS = [
+  'word/document.xml',
+  'word/styles.xml',
+  'word/settings.xml',
+  'word/numbering.xml',
+  'word/fontTable.xml',
+  'word/header1.xml','word/header2.xml','word/header3.xml',
+  'word/footer1.xml','word/footer2.xml','word/footer3.xml',
+];
 
 async function repairDocx(ab, opts) {
   const zip = await JSZip.loadAsync(ab);
-  const stats = { ns:0, attr:0, sdt:0, invalid:0, toc_entries:0, preface_added:false };
-  const before = {};
-  const after  = {};
+  const allFiles = {};
+  zip.forEach((path, file) => { allFiles[path] = file; });
 
-  const docFile = zip.file('word/document.xml');
-  if (!docFile) throw new Error('word/document.xml が見つかりません');
-  let xml = await docFile.async('string');
+  const stats = {
+    ns:0, bom:0, rsid:0, sdt:0, invalid:0,
+    toc_entries:0, preface_added:false, files_cleaned:0
+  };
+  const before = {}, after = {};
+  const fileReport = [];
 
-  before.size = xml.length;
-  before.ns   = BAD_NS.reduce((s,r) => s + countRe(xml,r), 0);
-  before.sdt  = (xml.match(/<w:sdt>/g)||[]).length;
-  before.hl   = (xml.match(/<w:hyperlink/g)||[]).length;
-  before.bm   = (xml.match(/<w:bookmarkStart/g)||[]).length;
+  // --- document.xml の before stats ---
+  const docRaw = await allFiles['word/document.xml'].async('uint8array');
+  const docBefore = new TextDecoder('utf-8').decode(docRaw);
+  before.size = docBefore.length;
+  before.ns   = (docBefore.match(/xmlns:w14=/g)||[]).length + (docBefore.match(/xmlns:wp14=/g)||[]).length;
+  before.sdt  = (docBefore.match(/<w:sdt>/g)||[]).length;
+  before.hl   = (docBefore.match(/<w:hyperlink/g)||[]).length;
+  before.bm   = (docBefore.match(/<w:bookmarkStart/g)||[]).length;
 
-  // 1. 名前空間クリーニング
-  if (opts.ns) {
-    for (const re of BAD_NS) { stats.ns += countRe(xml, re); xml = xml.replace(re, ''); }
-    for (const re of BAD_ATTRS) { stats.attr += countRe(xml, re); xml = xml.replace(re, ''); }
+  // --- 全XMLファイルをクリーニング ---
+  const outputFiles = {};
+
+  for (const [path, file] of Object.entries(allFiles)) {
+    const isXml  = path.endsWith('.xml');
+    const isRels = path.endsWith('.rels');
+
+    if (isXml || isRels) {
+      const raw = await file.async('uint8array');
+
+      // BOM除去（全xml/relsに適用）
+      let cleaned = raw;
+      if (opts.bom && raw[0]===0xEF && raw[1]===0xBB && raw[2]===0xBF) {
+        cleaned = raw.slice(3);
+        stats.bom++;
+      }
+
+      // 対象XMLは名前空間・rsidもクリーン
+      const isTarget = XML_TARGETS.includes(path);
+      if (isTarget) {
+        cleaned = deepCleanXml(cleaned, opts);
+        stats.files_cleaned++;
+
+        // ファイルレポート用チェック
+        const chk = checkXml(cleaned);
+        fileReport.push({ path, ...chk });
+      }
+
+      outputFiles[path] = cleaned;
+    } else {
+      outputFiles[path] = await file.async('uint8array');
+    }
   }
 
-  // 2. SDT目次除去
+  // --- document.xml に SDT除去・TOC・序文を適用 ---
+  let docXml = new TextDecoder('utf-8').decode(outputFiles['word/document.xml']);
+
   if (opts.sdt) {
-    const sdtM = xml.match(SDT_TOC) || [];
+    const sdtM = docXml.match(SDT_TOC_RE) || [];
     stats.sdt = sdtM.length;
-    xml = xml.replace(SDT_TOC, '');
+    docXml = docXml.replace(SDT_TOC_RE, '');
+    docXml = docXml.replace(/<w:p\b[^>]*>(?:(?!<\/w:p>).)*?<w:t[^>]*>Table of Contents<\/w:t>(?:(?!<\/w:p>).)*?<\/w:p>/gs, '');
+    docXml = docXml.replace(/<w:p\b[^>]*>(?:(?!<\/w:p>).)*?Please update Table of Contents(?:(?!<\/w:p>).)*?<\/w:p>/gs, '');
   }
 
-  // 3. TOCプレースホルダー見出し除去
-  xml = xml.replace(/<w:p\b[^>]*>(?:(?!<\/w:p>).)*?<w:t[^>]*>Table of Contents<\/w:t>(?:(?!<\/w:p>).)*?<\/w:p>/gs, '');
-  xml = xml.replace(/<w:p\b[^>]*>(?:(?!<\/w:p>).)*?Please update Table of Contents(?:(?!<\/w:p>).)*?<\/w:p>/gs, '');
-
-  // 4. ハイパーリンク目次生成
-  let tocXml = '';
-  let headings = [];
+  let tocXml = '', headings = [];
   if (opts.toc) {
-    headings = extractHeadings(xml);
+    headings = extractHeadings(docXml);
     if (headings.length > 0) {
-      xml = injectBookmarks(xml, headings);
+      docXml = injectBookmarks(docXml, headings);
       tocXml = buildTocXml(headings);
       stats.toc_entries = headings.length;
     }
   }
 
-  // 5. 序文挿入
   let prefXml = '';
   if (opts.pref) {
-    const prefMode = document.querySelector('.pm.active').textContent.trim();
-    const prefText = prefMode === 'English'
+    const activeBtn = document.querySelector('.pm.active');
+    const mode      = activeBtn ? activeBtn.textContent.trim() : 'English';
+    const prefText  = mode === 'English'
       ? document.getElementById('prefEn').value
       : document.getElementById('prefJa').value;
     if (prefText.trim()) {
@@ -439,43 +602,52 @@ async function repairDocx(ab, opts) {
     }
   }
 
-  // 6. 不正文字
-  const clean = xml.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, '');
-  stats.invalid = xml.length - clean.length;
-  xml = clean;
+  if (prefXml || tocXml) {
+    const bodyStart = docXml.indexOf('<w:body>') + '<w:body>'.length;
+    const bodyRest  = docXml.slice(bodyStart);
+    const insert    = (prefXml ? prefXml + '\n' : '') + (tocXml ? tocXml + '\n' : '');
+    docXml = docXml.slice(0, bodyStart) + '\n' + insert + bodyRest;
+  }
 
-  // 7. 組み立て: body冒頭 = 序文 → TOC → 本文
-  const bodyStart = xml.indexOf('<w:body>') + '<w:body>'.length;
-  const bodyContent = xml.slice(bodyStart);
-  const insert = (prefXml ? prefXml + '\n' : '') + (tocXml ? tocXml + '\n' : '');
-  xml = xml.slice(0, bodyStart) + '\n' + insert + bodyContent;
+  outputFiles['word/document.xml'] = new TextEncoder().encode(docXml);
 
-  after.size = xml.length;
-  after.ns   = BAD_NS.reduce((s,r) => s + countRe(xml,r), 0);
-  after.sdt  = (xml.match(/<w:sdt>/g)||[]).length;
-  after.hl   = (xml.match(/<w:hyperlink/g)||[]).length;
-  after.bm   = (xml.match(/<w:bookmarkStart/g)||[]).length;
+  // --- after stats ---
+  after.size = docXml.length;
+  after.ns   = (docXml.match(/xmlns:w14=/g)||[]).length + (docXml.match(/xmlns:wp14=/g)||[]).length;
+  after.sdt  = (docXml.match(/<w:sdt>/g)||[]).length;
+  after.hl   = (docXml.match(/<w:hyperlink/g)||[]).length;
+  after.bm   = (docXml.match(/<w:bookmarkStart/g)||[]).length;
 
-  zip.file('word/document.xml', xml);
-  const blob = await zip.generateAsync({
+  // --- ZIP生成 ---
+  const outZip = new JSZip();
+  for (const [path, data] of Object.entries(outputFiles)) {
+    outZip.file(path, data);
+  }
+  const blob = await outZip.generateAsync({
     type:'blob',
     mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    compression:'DEFLATE', compressionOptions:{level:6}
+    compression:'DEFLATE',
+    compressionOptions:{level:6}
   });
 
-  return { blob, stats, before, after, headings };
+  return { blob, stats, before, after, headings, fileReport };
 }
 
 // ============================================================
 // UI — SINGLE
 // ============================================================
-let singleBlob = null;
-let singleName = '';
+let singleBlob = null, singleName = '';
 
-function toggleOpt(el) { el.classList.toggle('on'); el.querySelector('.opt-check').textContent = el.classList.contains('on') ? '✓' : ''; }
+function toggleOpt(el) {
+  el.classList.toggle('on');
+  el.querySelector('.opt-check').textContent = el.classList.contains('on') ? '✓' : '';
+}
+
 function getOpts() {
   return {
     ns:   document.getElementById('opt-ns').classList.contains('on'),
+    bom:  document.getElementById('opt-bom').classList.contains('on'),
+    rsid: document.getElementById('opt-rsid').classList.contains('on'),
     sdt:  document.getElementById('opt-sdt').classList.contains('on'),
     toc:  document.getElementById('opt-toc').classList.contains('on'),
     pref: document.getElementById('opt-pref').classList.contains('on'),
@@ -484,8 +656,8 @@ function getOpts() {
 
 function log(msg, type='info') {
   const lb = document.getElementById('logBody');
-  const t = new Date().toTimeString().slice(0,8);
-  const d = document.createElement('div');
+  const t  = new Date().toTimeString().slice(0,8);
+  const d  = document.createElement('div');
   d.className = 'll';
   d.innerHTML = `<span class="lt">${t}</span><span class="l${type}">${msg}</span>`;
   lb.appendChild(d);
@@ -494,60 +666,67 @@ function log(msg, type='info') {
 
 async function processSingle(file) {
   singleName = file.name;
-  document.getElementById('logWrap').style.display = 'block';
-  document.getElementById('logBody').innerHTML = '';
-  document.getElementById('dot').className = 'dot pulse';
-  document.getElementById('logStat').textContent = '処理中...';
-  document.getElementById('diffCard').style.display = 'none';
-  document.getElementById('dlBtn').style.display = 'none';
-  document.getElementById('resetBtn').style.display = 'none';
+  document.getElementById('logWrap').style.display   = 'block';
+  document.getElementById('logBody').innerHTML        = '';
+  document.getElementById('dot').className            = 'dot pulse';
+  document.getElementById('logStat').textContent      = '処理中...';
+  document.getElementById('diffCard').style.display  = 'none';
+  document.getElementById('dlBtn').style.display     = 'none';
+  document.getElementById('resetBtn').style.display  = 'none';
 
   log(`ファイル: ${file.name}`, 'info');
   log(`サイズ: ${(file.size/1024).toFixed(1)} KB`, 'info');
 
   try {
-    const ab = await file.arrayBuffer();
-    log('ZIPとして展開...', 'info');
+    const ab   = await file.arrayBuffer();
     const opts = getOpts();
-    log(`オプション: NS=${opts.ns} SDT=${opts.sdt} TOC=${opts.toc} Preface=${opts.pref}`, 'info');
+    log(`オプション: NS=${opts.ns} BOM=${opts.bom} RSID=${opts.rsid} SDT=${opts.sdt} TOC=${opts.toc} Preface=${opts.pref}`, 'info');
 
-    const { blob, stats, before, after, headings } = await repairDocx(ab, opts);
+    const { blob, stats, before, after, headings, fileReport } = await repairDocx(ab, opts);
     singleBlob = blob;
 
-    if (stats.ns > 0)   log(`✓ 非標準名前空間: ${stats.ns}件除去`, 'ok');
-    if (stats.attr > 0) log(`✓ 問題属性: ${stats.attr}件除去`, 'ok');
-    if (stats.sdt > 0)  log(`✓ SDT目次: ${stats.sdt}個除去`, 'warn');
+    log(`✓ クリーニング済みXMLファイル: ${stats.files_cleaned}件`, 'ok');
+    if (stats.bom  > 0) log(`✓ BOM除去: ${stats.bom}ファイル`, 'ok');
+    if (stats.rsid > 0) log(`✓ rsid除去完了`, 'ok');
+    if (stats.sdt  > 0) log(`✓ SDT目次: ${stats.sdt}個除去`, 'warn');
     if (stats.toc_entries > 0) log(`✓ ハイパーリンク目次: ${stats.toc_entries}エントリ生成`, 'ok');
     if (stats.preface_added) log('✓ 序文挿入完了', 'ok');
-    if (stats.invalid > 0) log(`✓ 不正文字: ${stats.invalid}文字除去`, 'ok');
-    log(`完了 — ${(blob.size/1024).toFixed(1)} KB`, 'ok');
 
+    // 全ファイルクリーン確認
+    const remaining = fileReport.filter(f => f.w14 || f.w15 || f.mcIgn || f.bom);
+    if (remaining.length === 0) {
+      log('✅ 全XMLファイル: 完全クリーン確認', 'ok');
+    } else {
+      remaining.forEach(f => log(`⚠ 残存問題: ${f.path}`, 'warn'));
+    }
+
+    log(`完了 — ${(blob.size/1024).toFixed(1)} KB`, 'ok');
     document.getElementById('dot').className = 'dot ok';
     document.getElementById('logStat').textContent = '完了';
 
-    // Diff
-    showDiff(before, after, stats, headings, opts);
-    document.getElementById('dlBtn').style.display = 'block';
+    showDiff(before, after, stats, headings, fileReport, opts);
+    document.getElementById('dlBtn').style.display    = 'block';
     document.getElementById('resetBtn').style.display = 'block';
-
   } catch(e) {
     log(`エラー: ${e.message}`, 'err');
     document.getElementById('dot').className = 'dot err';
     document.getElementById('logStat').textContent = 'エラー';
+    console.error(e);
   }
 }
 
-function showDiff(b, a, stats, headings, opts) {
+function showDiff(b, a, stats, headings, fileReport, opts) {
   const rows = [
-    { label:'XMLサイズ', bv:b.size+'字', av:a.size+'字', cls: a.size < b.size ? 'grn':'neu' },
-    { label:'非標準名前空間', bv:b.ns+'件', av:a.ns+'件', cls: a.ns < b.ns ? 'grn':'neu' },
-    { label:'SDTブロック', bv:b.sdt+'個', av:a.sdt+'個', cls: a.sdt < b.sdt ? 'grn':'neu' },
-    { label:'ハイパーリンク', bv:b.hl+'個', av:a.hl+'個', cls: a.hl > b.hl ? 'grn':'neu' },
-    { label:'ブックマーク', bv:b.bm+'個', av:a.bm+'個', cls: a.bm > b.bm ? 'grn':'neu' },
+    { label:'XMLサイズ',       bv: b.size+'字',  av: a.size+'字',  cls: a.size < b.size ? 'grn':'neu' },
+    { label:'名前空間(w14等)', bv: b.ns+'件',    av: a.ns+'件',    cls: a.ns === 0 ? 'grn': a.ns < b.ns ? 'yel':'red' },
+    { label:'BOM除去',         bv: '—',           av: stats.bom+'ファイル', cls:'grn' },
+    { label:'rsid除去',        bv: '—',           av: stats.rsid ? '✅完了' : 'スキップ', cls: stats.rsid ? 'grn':'neu' },
+    { label:'SDTブロック',     bv: b.sdt+'個',   av: a.sdt+'個',   cls: a.sdt < b.sdt ? 'grn':'neu' },
+    { label:'ハイパーリンク',  bv: b.hl+'個',    av: a.hl+'個',    cls: a.hl > b.hl ? 'grn':'neu' },
+    { label:'ブックマーク',    bv: b.bm+'個',    av: a.bm+'個',    cls: a.bm > b.bm ? 'grn':'neu' },
   ];
 
-  const grid = document.getElementById('diffGrid');
-  grid.innerHTML = `
+  document.getElementById('diffGrid').innerHTML = `
     <div class="diff-col">
       <div class="diff-col-title">修復前</div>
       ${rows.map(r=>`<div class="diff-row"><span class="diff-label">${r.label}</span><span class="diff-val red">${r.bv}</span></div>`).join('')}
@@ -557,10 +736,26 @@ function showDiff(b, a, stats, headings, opts) {
       ${rows.map(r=>`<div class="diff-row"><span class="diff-label">${r.label}</span><span class="diff-val ${r.cls}">${r.av}</span></div>`).join('')}
     </div>`;
 
-  // TOCプレビュー
+  // ファイル別テーブル
+  if (fileReport.length > 0) {
+    const tbody = document.getElementById('fileTableBody');
+    tbody.innerHTML = fileReport.map(f => {
+      const clean = !f.bom && !f.w14 && !f.w15 && !f.mcIgn && !f.rsid;
+      const fname = f.path.split('/').pop();
+      return `<tr>
+        <td>${fname}</td>
+        <td class="${f.bom   ? 'fc-err':'fc-ok'}">${f.bom   ? '❌':'✅'}</td>
+        <td class="${(f.w14||f.w15) ? 'fc-err':'fc-ok'}">${(f.w14||f.w15) ? '❌':'✅'}</td>
+        <td class="${f.mcIgn ? 'fc-err':'fc-ok'}">${f.mcIgn ? '❌':'✅'}</td>
+        <td class="${f.rsid  ? 'fc-warn':'fc-ok'}">${f.rsid  ? '⚠':'✅'}</td>
+        <td class="${clean   ? 'fc-ok':'fc-err'}">${clean   ? '✅ CLEAN':'⚠ 要確認'}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('fileCheckWrap').style.display = 'block';
+  }
+
   if (opts.toc && headings.length > 0) {
-    const tp = document.getElementById('tocPreview');
-    tp.innerHTML = headings.map(h =>
+    document.getElementById('tocPreview').innerHTML = headings.map(h =>
       `<div class="toc-entry ${h.lvl===2?'h2':''}"><span class="toc-dot">›</span><span>${h.text}</span></div>`
     ).join('');
     document.getElementById('tocPreviewWrap').style.display = 'block';
@@ -571,46 +766,49 @@ function showDiff(b, a, stats, headings, opts) {
 
 function resetSingle() {
   singleBlob = null; singleName = '';
-  document.getElementById('logWrap').style.display = 'none';
-  document.getElementById('diffCard').style.display = 'none';
-  document.getElementById('dlBtn').style.display = 'none';
-  document.getElementById('resetBtn').style.display = 'none';
+  document.getElementById('logWrap').style.display   = 'none';
+  document.getElementById('diffCard').style.display  = 'none';
+  document.getElementById('dlBtn').style.display     = 'none';
+  document.getElementById('resetBtn').style.display  = 'none';
+  document.getElementById('fileCheckWrap').style.display = 'none';
+  document.getElementById('tocPreviewWrap').style.display = 'none';
   document.getElementById('fi').value = '';
 }
 
 const dz = document.getElementById('dropzone');
-dz.addEventListener('dragover', e=>{e.preventDefault();dz.classList.add('dragover')});
-dz.addEventListener('dragleave', ()=>dz.classList.remove('dragover'));
-dz.addEventListener('drop', e=>{
-  e.preventDefault();dz.classList.remove('dragover');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('dragover');
   const f = e.dataTransfer.files[0];
-  if(f&&f.name.endsWith('.docx')) processSingle(f);
+  if (f && f.name.endsWith('.docx')) processSingle(f);
 });
-document.getElementById('fi').addEventListener('change', e=>{
-  if(e.target.files[0]) processSingle(e.target.files[0]);
+document.getElementById('fi').addEventListener('change', e => {
+  if (e.target.files[0]) processSingle(e.target.files[0]);
 });
-document.getElementById('dlBtn').addEventListener('click', ()=>{
-  if(!singleBlob) return;
+document.getElementById('dlBtn').addEventListener('click', () => {
+  if (!singleBlob) return;
   const url = URL.createObjectURL(singleBlob);
-  const a = document.createElement('a');
-  a.href = url; a.download = singleName.replace(/\.docx$/i,'')+'_repaired.docx';
-  a.click(); URL.revokeObjectURL(url);
+  const a   = document.createElement('a');
+  a.href = url;
+  a.download = singleName.replace(/\.docx$/i, '') + '_repaired.docx';
+  a.click();
+  URL.revokeObjectURL(url);
 });
 
 // ============================================================
 // UI — BATCH
 // ============================================================
-let batchFiles = [];
-let batchBlobs = [];
+let batchFiles = [], batchBlobs = [];
 
 const dzB = document.getElementById('dropzoneBatch');
-dzB.addEventListener('dragover', e=>{e.preventDefault();dzB.classList.add('dragover')});
-dzB.addEventListener('dragleave', ()=>dzB.classList.remove('dragover'));
-dzB.addEventListener('drop', e=>{
-  e.preventDefault();dzB.classList.remove('dragover');
-  loadBatchFiles([...e.dataTransfer.files].filter(f=>f.name.endsWith('.docx')));
+dzB.addEventListener('dragover', e => { e.preventDefault(); dzB.classList.add('dragover'); });
+dzB.addEventListener('dragleave', () => dzB.classList.remove('dragover'));
+dzB.addEventListener('drop', e => {
+  e.preventDefault(); dzB.classList.remove('dragover');
+  loadBatchFiles([...e.dataTransfer.files].filter(f => f.name.endsWith('.docx')));
 });
-document.getElementById('fiBatch').addEventListener('change', e=>{
+document.getElementById('fiBatch').addEventListener('change', e => {
   loadBatchFiles([...e.target.files]);
 });
 
@@ -618,72 +816,71 @@ function loadBatchFiles(files) {
   batchFiles = files; batchBlobs = [];
   const list = document.getElementById('batchList');
   list.innerHTML = '';
-  files.forEach((f,i)=>{
+  files.forEach((f, i) => {
     const d = document.createElement('div');
-    d.className = 'batch-item'; d.id = `bi_${i}`;
+    d.className = 'batch-item';
     d.innerHTML = `<span class="batch-name">${f.name}</span>
       <span class="batch-status bs-wait" id="bs_${i}">待機中</span>`;
     list.appendChild(d);
   });
-  if(files.length>0) {
-    document.getElementById('batchRunBtn').style.display = 'block';
-    document.getElementById('batchDlBtn').style.display = 'none';
+  if (files.length > 0) {
+    document.getElementById('batchRunBtn').style.display   = 'block';
+    document.getElementById('batchDlBtn').style.display    = 'none';
     document.getElementById('batchResetBtn').style.display = 'none';
   }
 }
 
 async function runBatch() {
   document.getElementById('batchRunBtn').disabled = true;
-  const opts = { ns:true, sdt:true, toc:true, pref:false };
-  for(let i=0;i<batchFiles.length;i++) {
+  const opts = { ns:true, bom:true, rsid:true, sdt:true, toc:true, pref:false };
+  for (let i = 0; i < batchFiles.length; i++) {
     const s = document.getElementById(`bs_${i}`);
     s.className = 'batch-status bs-run'; s.textContent = '処理中...';
     try {
       const ab = await batchFiles[i].arrayBuffer();
       const { blob } = await repairDocx(ab, opts);
-      batchBlobs[i] = { blob, name: batchFiles[i].name.replace(/\.docx$/i,'')+'_repaired.docx' };
+      batchBlobs[i] = { blob, name: batchFiles[i].name.replace(/\.docx$/i,'') + '_repaired.docx' };
       s.className = 'batch-status bs-ok'; s.textContent = '完了';
     } catch(e) {
       s.className = 'batch-status bs-err'; s.textContent = 'エラー';
     }
   }
-  document.getElementById('batchDlBtn').style.display = 'block';
+  document.getElementById('batchDlBtn').style.display    = 'block';
   document.getElementById('batchResetBtn').style.display = 'block';
 }
 
 function downloadAll() {
-  batchBlobs.forEach(b=>{
-    if(!b) return;
+  batchBlobs.forEach(b => {
+    if (!b) return;
     const url = URL.createObjectURL(b.blob);
-    const a = document.createElement('a');
-    a.href=url; a.download=b.name; a.click(); URL.revokeObjectURL(url);
+    const a   = document.createElement('a');
+    a.href = url; a.download = b.name; a.click();
+    URL.revokeObjectURL(url);
   });
 }
 
 function resetBatch() {
-  batchFiles=[]; batchBlobs=[];
-  document.getElementById('batchList').innerHTML='';
-  document.getElementById('batchRunBtn').style.display='none';
-  document.getElementById('batchDlBtn').style.display='none';
-  document.getElementById('batchResetBtn').style.display='none';
-  document.getElementById('fiBatch').value='';
+  batchFiles = []; batchBlobs = [];
+  document.getElementById('batchList').innerHTML        = '';
+  document.getElementById('batchRunBtn').style.display   = 'none';
+  document.getElementById('batchDlBtn').style.display    = 'none';
+  document.getElementById('batchResetBtn').style.display = 'none';
+  document.getElementById('fiBatch').value = '';
 }
 
 // ============================================================
-// UI — TABS / PREFACE
+// TABS / PREFACE
 // ============================================================
 function switchTab(id) {
-  document.querySelectorAll('.tab').forEach((t,i)=>{
-    const ids=['single','batch','preface'];
-    t.classList.toggle('active', ids[i]===id);
-  });
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  const ids = ['single','batch','preface','about'];
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ids[i]===id));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
 }
 
-function setPrefMode(mode) {
-  document.querySelectorAll('.pm').forEach(b=>b.classList.remove('active'));
-  event.target.classList.add('active');
+function setPrefMode(mode, e) {
+  document.querySelectorAll('.pm').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
   document.getElementById('prefEn').style.display = mode==='en' ? 'block':'none';
   document.getElementById('prefJa').style.display = mode==='ja' ? 'block':'none';
 }
