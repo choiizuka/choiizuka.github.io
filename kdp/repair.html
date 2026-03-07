@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOCX Repair Tool — Choiizuka</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --border: #1e1e2e;
+    --accent: #e8c547;
+    --accent2: #4fc3a1;
+    --danger: #ff5f5f;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --success: #4fc3a1;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* 背景グリッド */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232,197,71,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,197,71,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 780px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ヘッダー */
+  header {
+    margin-bottom: 48px;
+    text-align: center;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 12px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--text);
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  .subtitle {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* ドロップゾーン */
+  #dropzone {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 60px 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    margin-bottom: 24px;
+  }
+
+  #dropzone::before, #dropzone::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: var(--accent);
+    border-style: solid;
+    opacity: 0.5;
+  }
+  #dropzone::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+  #dropzone::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+
+  #dropzone.dragover {
+    border-color: var(--accent);
+    background: rgba(232,197,71,0.04);
+  }
+  #dropzone.dragover::before,
+  #dropzone.dragover::after { opacity: 1; }
+
+  .drop-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+    display: block;
+    opacity: 0.6;
+  }
+
+  .drop-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .drop-hint {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  #fileInput { display: none; }
+
+  /* ログパネル */
+  #logPanel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .log-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .log-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: blink 1s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .log-dot.done { background: var(--success); animation: none; }
+  .log-dot.error { background: var(--danger); animation: none; }
+
+  #logContent {
+    padding: 16px;
+    font-size: 11px;
+    line-height: 1.8;
+    max-height: 280px;
+    overflow-y: auto;
+    color: var(--muted);
+  }
+
+  .log-line { display: flex; gap: 12px; }
+  .log-time { color: var(--border); flex-shrink: 0; font-size: 10px; }
+  .log-ok   { color: var(--success); }
+  .log-warn { color: var(--accent); }
+  .log-err  { color: var(--danger); }
+  .log-info { color: var(--muted); }
+
+  /* 結果サマリー */
+  #summary {
+    display: none;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+
+  .summary-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .check-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .check-item.ok   { color: var(--text); }
+  .check-item.warn { color: var(--accent); }
+
+  .check-badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+  .badge-ok   { background: rgba(79,195,161,0.15); color: var(--success); }
+  .badge-warn { background: rgba(232,197,71,0.15);  color: var(--accent); }
+  .badge-fix  { background: rgba(255,95,95,0.15);   color: var(--danger); }
+
+  /* ダウンロードボタン */
+  #downloadBtn {
+    display: none;
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    color: #0a0a0f;
+    border: none;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+  }
+
+  #downloadBtn:hover {
+    background: #f0d060;
+    transform: translateY(-1px);
+  }
+
+  #resetBtn {
+    display: none;
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+  }
+  #resetBtn:hover { color: var(--text); border-color: var(--muted); }
+
+  /* 修復内容リスト */
+  .repair-list {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .repair-list li {
+    list-style: none;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .repair-count {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 12px;
+  }
+
+  footer {
+    margin-top: 48px;
+    text-align: center;
+    font-size: 10px;
+    color: var(--border);
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="badge">Choiizuka Books · Tool v1.0</div>
+    <h1>DOCX <span>Repair</span><br>Tool</h1>
+    <p class="subtitle">// KDP提出用 · 非標準名前空間・SDT目次を自動修復</p>
+  </header>
+
+  <div id="dropzone" onclick="document.getElementById('fileInput').click()">
+    <span class="drop-icon">⬡</span>
+    <div class="drop-title">ファイルをドロップ / クリックして選択</div>
+    <div class="drop-hint">.docx only — Microsoft Word 2007+</div>
+  </div>
+  <input type="file" id="fileInput" accept=".docx">
+
+  <div id="logPanel">
+    <div class="log-header">
+      <div class="log-dot" id="logDot"></div>
+      <span id="logStatus">処理中...</span>
+    </div>
+    <div id="logContent"></div>
+  </div>
+
+  <div id="summary">
+    <div class="summary-title">
+      <span id="summaryIcon">⬡</span>
+      <span id="summaryTitle">修復結果</span>
+    </div>
+    <div class="check-grid" id="checkGrid"></div>
+    <ul class="repair-list" id="repairList"></ul>
+  </div>
+
+  <button id="downloadBtn">⬇ 修復済みファイルをダウンロード</button>
+  <button id="resetBtn">← 別のファイルを修復する</button>
+
+</div>
+
+<footer>DOCX REPAIR TOOL · BY CHOIIZUKA · THE NOBUNAGA OS 2.0</footer>
+
+<script>
+// ==============================
+// REPAIR ENGINE
+// ==============================
+
+const PROBLEMATIC_NS = [
+  // word/2010/wordml 系（破損の主原因）
+  /\s+xmlns:wp14="http:\/\/schemas\.microsoft\.com\/office\/word\/2010\/wordml"/g,
+  // wordprocessingDrawing 系
+  /\s+xmlns:wp14="http:\/\/schemas\.microsoft\.com\/office\/word\/2010\/wordprocessingDrawing"/g,
+  // w16 系
+  /\s+xmlns:w16cex="[^"]*"/g,
+  /\s+xmlns:w16sdtdh="[^"]*"/g,
+  /\s+xmlns:w16se="[^"]*"/g,
+  /\s+xmlns:w16cid="[^"]*"/g,
+  /\s+xmlns:w16="[^"]*"/g,
+];
+
+const PROBLEMATIC_ATTRS = [
+  // wp14 属性値（paraId・textId等）
+  /\s+wp14:[a-zA-Z]+="[^"]*"/g,
+  // w14 属性
+  /\s+w14:paraId="[^"]*"/g,
+  /\s+w14:textId="[^"]*"/g,
+];
+
+// SDT目次ブロック（Wordの自動目次 = 破損の原因）
+const SDT_TOC_RE = /<w:sdt>[\s\S]*?<w:docPartGallery w:val="Table of Contents"[\s\S]*?<\/w:sdt>/g;
+
+function countMatches(str, re) {
+  return (str.match(new RegExp(re.source, re.flags.replace('g','') + 'g')) || []).length;
+}
+
+async function repairDocx(arrayBuffer) {
+  const zip = await JSZip.loadAsync(arrayBuffer);
+  const results = {
+    ns_removed: 0,
+    attr_removed: 0,
+    sdt_removed: 0,
+    invalid_chars: 0,
+    files_processed: 0,
+  };
+
+  const xmlFiles = ['word/document.xml', 'word/styles.xml', 'word/settings.xml'];
+
+  for (const fname of xmlFiles) {
+    if (!zip.file(fname)) continue;
+    let xml = await zip.file(fname).async('string');
+    const before = xml.length;
+    results.files_processed++;
+
+    // 1. 非標準名前空間除去
+    for (const re of PROBLEMATIC_NS) {
+      const count = countMatches(xml, re);
+      results.ns_removed += count;
+      xml = xml.replace(re, '');
+    }
+
+    // 2. 問題属性除去
+    for (const re of PROBLEMATIC_ATTRS) {
+      const count = countMatches(xml, re);
+      results.attr_removed += count;
+      xml = xml.replace(re, '');
+    }
+
+    // 3. SDT目次除去（document.xmlのみ）
+    if (fname === 'word/document.xml') {
+      const sdtMatches = xml.match(SDT_TOC_RE) || [];
+      results.sdt_removed = sdtMatches.length;
+      if (sdtMatches.length > 0) {
+        xml = xml.replace(SDT_TOC_RE,
+          '<w:p><w:r><w:t>[Table of Contents — Please update in Word: References → Update Table]</w:t></w:r></w:p>'
+        );
+      }
+    }
+
+    // 4. 不正制御文字除去
+    const cleaned = xml.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, '');
+    results.invalid_chars += xml.length - cleaned.length;
+    xml = cleaned;
+
+    zip.file(fname, xml);
+  }
+
+  const blob = await zip.generateAsync({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    compression: 'DEFLATE',
+    compressionOptions: { level: 6 }
+  });
+
+  return { blob, results };
+}
+
+// ==============================
+// UI
+// ==============================
+
+const dropzone   = document.getElementById('dropzone');
+const fileInput  = document.getElementById('fileInput');
+const logPanel   = document.getElementById('logPanel');
+const logContent = document.getElementById('logContent');
+const logDot     = document.getElementById('logDot');
+const logStatus  = document.getElementById('logStatus');
+const summary    = document.getElementById('summary');
+const downloadBtn= document.getElementById('downloadBtn');
+const resetBtn   = document.getElementById('resetBtn');
+
+let repairedBlob = null;
+let originalName = '';
+
+function log(msg, type='info') {
+  const now = new Date();
+  const time = now.toTimeString().slice(0,8);
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.innerHTML = `<span class="log-time">${time}</span><span class="log-${type}">${msg}</span>`;
+  logContent.appendChild(line);
+  logContent.scrollTop = logContent.scrollHeight;
+}
+
+function showSummary(results, totalFixed) {
+  const checks = [
+    { label: '非標準名前空間',  val: results.ns_removed,   unit: '件除去' },
+    { label: '問題属性',        val: results.attr_removed,  unit: '件除去' },
+    { label: 'SDT目次ブロック', val: results.sdt_removed,   unit: '件除去' },
+    { label: '不正制御文字',    val: results.invalid_chars, unit: '文字除去' },
+  ];
+
+  const grid = document.getElementById('checkGrid');
+  grid.innerHTML = '';
+  checks.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'check-item ' + (c.val > 0 ? 'ok' : '');
+    const badgeClass = c.val > 0 ? 'badge-fix' : 'badge-ok';
+    div.innerHTML = `
+      <span class="check-badge ${badgeClass}">${c.val > 0 ? c.val + c.unit : 'クリーン'}</span>
+      <span>${c.label}</span>`;
+    grid.appendChild(div);
+  });
+
+  const list = document.getElementById('repairList');
+  list.innerHTML = '';
+  if (totalFixed > 0) {
+    const li = document.createElement('li');
+    li.innerHTML = `<span>合計修復量</span><span class="repair-count">${totalFixed} 文字削減</span>`;
+    list.appendChild(li);
+  }
+
+  const icon = document.getElementById('summaryIcon');
+  const title = document.getElementById('summaryTitle');
+  if (totalFixed > 0) {
+    icon.textContent = '✓';
+    title.textContent = `修復完了 — ${totalFixed}文字の問題を除去`;
+    title.style.color = 'var(--success)';
+  } else {
+    icon.textContent = '✓';
+    title.textContent = '問題なし — ファイルはクリーンです';
+    title.style.color = 'var(--success)';
+  }
+
+  summary.style.display = 'block';
+}
+
+async function processFile(file) {
+  originalName = file.name;
+  logPanel.style.display = 'block';
+  logContent.innerHTML = '';
+  logDot.className = 'log-dot';
+  logStatus.textContent = '処理中...';
+
+  log(`ファイル受信: ${file.name}`, 'info');
+  log(`サイズ: ${(file.size/1024).toFixed(1)} KB`, 'info');
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    log('ZIPとして展開中...', 'info');
+
+    // JSZipで開けるか確認
+    await JSZip.loadAsync(arrayBuffer);
+    log('docx構造: 正常', 'ok');
+
+    log('非標準名前空間を検索中...', 'info');
+    log('SDTブロックを検索中...', 'info');
+    log('不正文字を検索中...', 'info');
+
+    const { blob, results } = await repairDocx(arrayBuffer);
+    repairedBlob = blob;
+
+    const totalFixed = results.ns_removed + results.attr_removed +
+                       results.sdt_removed + results.invalid_chars;
+
+    if (results.ns_removed > 0)
+      log(`✓ 非標準名前空間: ${results.ns_removed}件除去`, 'ok');
+    else
+      log('非標準名前空間: 検出なし', 'info');
+
+    if (results.attr_removed > 0)
+      log(`✓ 問題属性: ${results.attr_removed}件除去`, 'ok');
+    else
+      log('問題属性: 検出なし', 'info');
+
+    if (results.sdt_removed > 0)
+      log(`✓ SDT目次ブロック: ${results.sdt_removed}個除去`, 'warn');
+    else
+      log('SDT目次: 検出なし', 'info');
+
+    if (results.invalid_chars > 0)
+      log(`✓ 不正制御文字: ${results.invalid_chars}文字除去`, 'ok');
+
+    log(`修復完了 — ${(blob.size/1024).toFixed(1)} KB`, 'ok');
+
+    logDot.className = 'log-dot done';
+    logStatus.textContent = '完了';
+
+    showSummary(results, totalFixed);
+    downloadBtn.style.display = 'block';
+    resetBtn.style.display = 'block';
+
+  } catch (err) {
+    log(`エラー: ${err.message}`, 'err');
+    logDot.className = 'log-dot error';
+    logStatus.textContent = 'エラー';
+  }
+}
+
+// ドラッグ&ドロップ
+dropzone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropzone.classList.add('dragover');
+});
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.docx')) processFile(file);
+  else log('エラー: .docxファイルのみ対応', 'err');
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) processFile(e.target.files[0]);
+});
+
+// ダウンロード
+downloadBtn.addEventListener('click', () => {
+  if (!repairedBlob) return;
+  const base = originalName.replace(/\.docx$/i, '');
+  const url = URL.createObjectURL(repairedBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = base + '_repaired.docx';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// リセット
+resetBtn.addEventListener('click', () => {
+  logPanel.style.display = 'none';
+  summary.style.display = 'none';
+  downloadBtn.style.display = 'none';
+  resetBtn.style.display = 'none';
+  logContent.innerHTML = '';
+  repairedBlob = null;
+  fileInput.value = '';
+});
+</script>
+</body>
+</html>
