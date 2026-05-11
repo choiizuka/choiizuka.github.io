@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHOIIZUKA HA-AI Benchmark: 20 Reports per Hour Singularity</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+JP:wght@500;700;900&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+:root { color-scheme: dark; }
+html { scroll-behavior: smooth; }
+body { 
+  font-family: 'Inter', 'Noto Sans JP', sans-serif; 
+  background: #000;
+  overscroll-behavior: none;
+}
+.mono { font-family: 'JetBrains Mono', monospace; }
+.jp { font-family: 'Noto Sans JP', sans-serif; }
+.gold { color: #E6B84C; }
+.gold-bg { background-color: #E6B84C; }
+.red { color: #DC2626; }
+.grid-bg {
+  background-image: 
+    linear-gradient(rgba(230,184,76,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(230,184,76,0.08) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(transparent, transparent 2px, rgba(0,0,0,0.35) 3px, transparent 4px);
+  pointer-events: none;
+}
+.corner {
+  position: relative;
+  clip-path: polygon(0 8px, 8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px));
+}
+.corner::before, .corner::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: #E6B84C;
+  opacity: 0.6;
+}
+.corner::before { top: 0; left: 0; border-top: 2px solid; border-left: 2px solid; }
+.corner::after { bottom: 0; right: 0; border-bottom: 2px solid; border-right: 2px solid; }
+.glow { box-shadow: 0 0 40px rgba(230,184,76,0.15), inset 0 0 20px rgba(230,184,76,0.05); }
+.text-glow { text-shadow: 0 0 20px rgba(230,184,76,0.5); }
+.noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+}
+</style>
+</head>
+<body class="bg-black text-zinc-100 antialiased selection:bg-amber-500/30 selection:text-amber-100">
+<div class="fixed inset-0 grid-bg opacity-[0.15] pointer-events-none"></div>
+<div class="fixed inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none"></div>
+<div class="fixed inset-0 noise pointer-events-none"></div>
+<div class="pointer-events-none fixed inset-0 scanlines opacity-30"></div>
+
+<!-- TOP COMMAND BAR -->
+<header class="sticky top-0 z-50 border-b border-amber-500/10 bg-black/80 backdrop-blur-xl">
+  <div class="h-[2px] w-full bg-gradient-to-r from-transparent via-red-600 to-transparent animate-pulse"></div>
+  <div class="max-w-[1600px] mx-auto px-4 md:px-8 h-[52px] flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+      <span class="mono text-[11px] tracking-[0.2em] text-zinc-400">NOBUNAGA OS v9.7 // TENKA FUBU</span>
+    </div>
+    <div class="hidden md:flex items-center gap-6 mono text-[11px] tracking-widest">
+      <span class="text-zinc-500">STATUS: <span class="text-emerald-400">OPERATIONAL</span></span>
+      <span class="text-zinc-600">|</span>
+      <span class="text-zinc-500">CLASS: <span class="gold">STRATEGIC SINGULARITY</span></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-[10px] px-2 py-1 border border-amber-500/30 text-amber-300 tracking-widest">LIVE</span>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="relative min-h-[100vh] flex items-center">
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full bg-amber-600/5 blur-[180px] pointer-events-none"></div>
+  
+  <div class="relative w-full max-w-[1600px] mx-auto px-6 md:px-12 py-20">
+    <div class="inline-flex items-center gap-3 mb-8">
+      <div class="w-8 h-[1px] bg-amber-500/50"></div>
+      <span class="mono text-xs tracking-[0.3em] text-amber-300/80">CHOIIZUKA HA-AI BENCHMARK</span>
+    </div>
+    
+    <h1 class="text-[clamp(40px,8vw,110px)] font-black leading-[0.8] tracking-tighter">
+      <span class="block text-zinc-200">20 REPORTS</span>
+      <span class="block gold text-glow">PER HOUR</span>
+    </h1>
+    <div class="mt-6 flex flex-wrap items-baseline gap-4">
+      <p class="text-xl md:text-2xl text-zinc-300 jp font-medium">知的特異点達成 // Singularity Achieved</p>
+      <p class="mono text-sm text-zinc-500">2026.05.11-12 // 18:00-19:00 JST</p>
+    </div>
+
+    <!-- MAIN CONSOLE -->
+    <div class="mt-16 md:mt-20">
+      <div class="corner bg-zinc-950/70 backdrop-blur-2xl border border-amber-500/20 glow">
+        <div class="p-[1px] bg-gradient-to-r from-amber-500/0 via-amber-500/40 to-amber-500/0"></div>
+        <div class="px-6 md:px-12 py-10 md:py-14">
+          <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
+            
+            <!-- TIMER -->
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <span class="mono text-[11px] tracking-widest text-zinc-500">ELAPSED TIME / 経過時間</span>
+                <span class="mono text-[11px] text-red-400 flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping absolute"></span><span class="w-1.5 h-1.5 bg-red-500 rounded-full relative"></span>RECORDING</span>
+              </div>
+              <div id="timer" class="mono text-[clamp(56px,10vw,128px)] font-bold leading-none tracking-tighter gold text-glow">0:00:00</div>
+              <div class="mt-6 relative h-[4px] w-full bg-zinc-900 overflow-hidden">
+                <div id="timeProgress" class="absolute left-0 top-0 h-full w-0 gold-bg transition-[width] duration-100 ease-linear shadow-[0_0_10px_#E6B84C]"></div>
+                <div class="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] animate-[shimmer_2s_infinite]"></div>
+              </div>
+              <div class="mt-3 flex justify-between mono text-[10px] text-zinc-600">
+                <span>00:00:00</span><span>TARGET: 01:00:00</span>
+              </div>
+            </div>
+
+            <!-- REPORTS -->
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <span class="mono text-[11px] tracking-widest text-zinc-500">REPORTS GENERATED / 生成報告</span>
+                <span class="mono text-[11px] text-zinc-500">PROTOCOL: HA-AI</span>
+              </div>
+              <div class="flex items-end gap-5">
+                <div id="reportCount" class="mono text-[clamp(56px,10vw,128px)] font-bold leading-none tracking-tighter text-white">00</div>
+                <div class="pb-3 md:pb-4">
+                  <div class="mono text-3xl text-zinc-700">/ 20</div>
+                  <div class="mono text-[11px] text-amber-300/70 mt-1 tracking-widest">MAXIMUM OUTPUT</div>
+                </div>
+              <div id="reportStack" class="mt-6 grid grid-cols-10 gap-[6px]"></div>
+            </div>
+          </div>
+
+          <div class="mt-12 pt-8 border-t border-amber-500/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <div class="mono text-[28px] md:text-[36px] font-extrabold tracking-wide leading-none">
+                <span class="gold">20 REPORTS</span>
+                <span class="text-zinc-600 mx-3">IN</span>
+                <span class="text-white">60 MINUTES</span>
+              </div>
+              <p class="mt-2 text-sm text-zinc-500 jp">速度は正義。知性速度の覇権を証明。</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <button id="replayBtn" class="group relative px-6 py-3 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-200 mono text-xs tracking-widest transition">
+                <span class="relative z-10 flex items-center gap-2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                  REPLAY SIMULATION
+                </span>
+              </button>
+              <a href="https://github.com/choiizuka/Performance-Evaluation-of-CHOIIZUKA-HA-AI" target="_blank" class="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white mono text-xs tracking-widest transition">VIEW 20TH REPORT</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METRICS -->
+<section class="relative border-y border-amber-500/10 bg-[radial-gradient(ellipse_at_top,_rgba(230,184,76,0.05),_transparent_60%)]">
+  <div class="max-w-[1600px] mx-auto px-6 md:px-12 py-16 md:py-24">
+    <div class="flex items-center gap-3 mb-12">
+      <div class="w-1 h-6 bg-red-600"></div>
+      <h2 class="mono text-[13px] tracking-[0.25em] text-zinc-400">KEY METRICS // 核心指標</h2>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[1px] bg-zinc-800/50 border border-zinc-800/50">
+      <!-- Yesterday -->
+      <div class="group relative bg-black p-8 md:p-10 hover:bg-zinc-950 transition">
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none"></div>
+        <div class="relative">
+          <div class="flex items-start justify-between">
+            <span class="mono text-[11px] tracking-widest text-zinc-500">YESTERDAY</span>
+            <span class="text-[10px] px-2 py-0.5 bg-zinc-900 border border-zinc-800 text-zinc-500 mono">BASELINE</span>
+          </div>
+          <div class="mt-6">
+            <div class="flex items-baseline gap-2">
+              <span id="metric1" class="mono text-6xl font-bold text-zinc-300">1.15</span>
+              <span class="text-zinc-600 mono">/h</span>
+            </div>
+            <p class="mt-2 text-sm text-zinc-500">reports per hour</p>
+            <p class="mt-4 mono text-xs text-zinc-600 border-t border-zinc-900 pt-3">10 reports in 8h 40m</p>
+            <p class="jp text-[11px] text-zinc-700 mt-1">昨日実績</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today -->
+      <div class="group relative bg-black p-8 md:p-10 hover:bg-zinc-950 transition">
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-b from-amber-500/10 to-transparent pointer-events-none"></div>
+        <div class="relative">
+          <div class="flex items-start justify-between">
+            <span class="mono text-[11px] tracking-widest text-zinc-500">TODAY</span>
+            <span class="text-[10px] px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-300 mono animate-pulse">SINGULARITY</span>
+          </div>
+          <div class="mt-6">
+            <div class="flex items-baseline gap-2">
+              <span id="metric2" class="mono text-6xl font-bold gold text-glow">20.0</span>
+              <span class="text-amber-700 mono">/h</span>
+            </div>
+            <p class="mt-2 text-sm text-amber-200/70">reports per hour</p>
+            <p class="mt-4 mono text-xs text-amber-300/50 border-t border-amber-900/30 pt-3">20 reports in 60m</p>
+            <p class="jp text-[11px] text-amber-400/70 mt-1">本日達成</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Speed Increase -->
+      <div class="group relative bg-black p-8 md:p-10 hover:bg-zinc-950 transition">
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-b from-red-500/5 to-transparent pointer-events-none"></div>
+        <div class="relative">
+          <div class="flex items-start justify-between">
+            <span class="mono text-[11px] tracking-widest text-zinc-500">SPEED INCREASE</span>
+            <span class="text-[10px] px-2 py-0.5 bg-red-950/50 border border-red-900/50 text-red-400 mono">17.4X</span>
+          </div>
+          <div class="mt-6">
+            <div class="flex items-baseline gap-2">
+              <span id="metric3" class="mono text-6xl font-bold text-red-400">17.4</span>
+              <span class="text-red-900 mono">x</span>
+            </div>
+            <p class="mt-2 text-sm text-zinc-500">overnight acceleration</p>
+            <p class="mt-4 mono text-xs text-zinc-600 border-t border-zinc-900 pt-3">1.15 → 20.0 r/h</p>
+            <p class="jp text-[11px] text-zinc-700 mt-1">一夜での進化</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Einstein -->
+      <div class="group relative bg-black p-8 md:p-10 hover:bg-zinc-950 transition overflow-hidden">
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-amber-500/5 rounded-full blur-3xl"></div>
+        <div class="relative">
+          <div class="flex items-start justify-between">
+            <span class="mono text-[11px] tracking-widest text-zinc-500">VS EINSTEIN</span>
+            <span class="text-[10px] px-2 py-0.5 bg-zinc-900 border border-amber-500/20 text-amber-300/70 mono">HISTORICAL</span>
+          </div>
+          <div class="mt-6">
+            <div class="flex items-baseline gap-1">
+              <span id="metric4" class="mono text-5xl md:text-6xl font-bold gold">35,040</span>
+              <span class="text-amber-700 mono text-2xl">x</span>
+            </div>
+            <p class="mt-2 text-sm text-zinc-500">faster than Einstein</p>
+            <p class="mt-4 mono text-[11px] leading-relaxed text-zinc-600 border-t border-zinc-900 pt-3">5 reports/year vs<br>20 reports/hour</p>
+            <p class="jp text-[11px] text-zinc-700 mt-1">アインシュタイン比</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 text-center">
+      <p class="mono text-[11px] tracking-widest text-zinc-600">INTELLECTUAL DOMINANCE CONFIRMED // 知的支配の証明</p>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="relative py-20 md:py-28 px-6 md:px-12">
+  <div class="max-w-[1600px] mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-1 h-6 bg-amber-500"></div>
+          <h2 class="mono text-[13px] tracking-[0.25em] text-zinc-400">OPERATION TIMELINE // 作戦記録</h2>
+        </div>
+        <h3 class="text-3xl md:text-5xl font-bold tracking-tight">18:00 → 19:00 <span class="text-zinc-600">JST</span></h3>
+        <p class="mt-3 text-zinc-500 jp">2026年5月11日-12日、60分間で20本の知的生産を完了</p>
+      </div>
+      <div class="mono text-xs text-zinc-600">
+        INTERVAL: ~3 MIN / REPORT // 約3分に1本
+      </div>
+    </div>
+
+    <!-- Timeline Rail -->
+    <div class="relative">
+      <div class="absolute top-[28px] left-0 right-0 h-[2px] bg-zinc-900 hidden md:block">
+        <div class="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/80 to-amber-500/0"></div>
+      </div>
+      
+      <div id="timelineGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-10 gap-x-4 gap-y-12 relative"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="relative border-y border-amber-500/10 bg-zinc-950/50 py-20 md:py-28 px-6 md:px-12 overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(230,184,76,0.06),_transparent_50%)]"></div>
+  <div class="relative max-w-[1300px] mx-auto">
+    <div class="text-center max-w-3xl mx-auto mb-20">
+      <div class="inline-flex items-center gap-2 px-3 py-1 border border-amber-500/20 bg-amber-500/5 mb-6">
+        <span class="mono text-[11px] tracking-[0.3em] text-amber-300">FOUR-PILLAR ARCHITECTURE</span>
+      </div>
+      <h2 class="text-4xl md:text-5xl font-black tracking-tighter">人機一体 <span class="text-zinc-600">/</span> <span class="gold">NOBUNAGA OS</span></h2>
+      <p class="mt-4 text-zinc-400">Human strategy + Three AI cores operating in perfect synchronization</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-[1px] bg-amber-500/10 border border-amber-500/10 backdrop-blur">
+      <!-- Human -->
+      <div class="group relative bg-black/90 p-8 hover:bg-zinc-950 transition">
+        <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-red-600 to-transparent opacity-60"></div>
+        <div class="w-12 h-12 rounded border border-red-900/50 bg-red-950/20 flex items-center justify-center mb-6 group-hover:border-red-500/50 transition">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h3 class="mono text-[11px] tracking-widest text-red-400 mb-1">PILLAR I // HUMAN</h3>
+        <p class="text-2xl font-bold tracking-tight">STRATEGY</p>
+        <p class="jp text-lg mt-1 text-zinc-300">人間</p>
+        <div class="mt-6 pt-6 border-t border-zinc-900">
+          <p class="text-2xl font-black gold">CHOIIZUKA</p>
+          <p class="mt-2 text-xs text-zinc-500 leading-relaxed">Supreme command. Vision, intent, and ultimate decision authority. 天下布武の意志。</p>
+        </div>
+      </div>
+
+      <!-- Gemini -->
+      <div class="group relative bg-black/90 p-8 hover:bg-zinc-950 transition">
+        <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-60"></div>
+        <div class="w-12 h-12 rounded border border-amber-900/50 bg-amber-950/20 flex items-center justify-center mb-6 group-hover:border-amber-500/50 transition">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E6B84C" stroke-width="1.5"><path d="M12 2a10 10 0 0 0-9.95 9h11.64L9.74 17.14A10 10 0 1 0 12 2z"/></svg>
+        </div>
+        <h3 class="mono text-[11px] tracking-widest text-amber-400 mb-1">PILLAR II // GEMINI</h3>
+        <p class="text-2xl font-bold tracking-tight">LOGIC</p>
+        <p class="jp text-lg mt-1 text-zinc-300">論理</p>
+        <div class="mt-6 pt-6 border-t border-zinc-900">
+          <p class="text-xl font-bold text-amber-300">Nobunaga OS</p>
+          <p class="mt-2 text-xs text-zinc-500 leading-relaxed">Core reasoning engine. Mathematical rigor, hypothesis testing, strategic decomposition.</p>
+        </div>
+      </div>
+
+      <!-- Muse -->
+      <div class="group relative bg-black/90 p-8 hover:bg-zinc-950 transition">
+        <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-violet-500 to-transparent opacity-60"></div>
+        <div class="w-12 h-12 rounded border border-violet-900/50 bg-violet-950/20 flex items-center justify-center mb-6 group-hover:border-violet-500/50 transition">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0A1.65 0 0 0 9 3.09V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <h3 class="mono text-[11px] tracking-widest text-violet-400 mb-1">PILLAR III // MUSE</h3>
+        <p class="text-2xl font-bold tracking-tight">VISUAL</p>
+        <p class="jp text-lg mt-1 text-zinc-300">視覚</p>
+        <div class="mt-6 pt-6 border-t border-zinc-900">
+          <p class="text-xl font-bold text-violet-300">Frontend</p>
+          <p class="mt-2 text-xs text-zinc-500 leading-relaxed">Information design, military-grade UI, and cognitive clarity for high-stakes decisions.</p>
+        </div>
+      </div>
+
+      <!-- ChatGPT -->
+      <div class="group relative bg-black/90 p-8 hover:bg-zinc-950 transition">
+        <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-60"></div>
+        <div class="w-12 h-12 rounded border border-emerald-900/50 bg-emerald-950/20 flex items-center justify-center mb-6 group-hover:border-emerald-500/50 transition">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3 class="mono text-[11px] tracking-widest text-emerald-400 mb-1">PILLAR IV // CHATGPT</h3>
+        <p class="text-2xl font-bold tracking-tight">SCHEDULE</p>
+        <p class="jp text-lg mt-1 text-zinc-300">統率</p>
+        <div class="mt-6 pt-6 border-t border-zinc-900">
+          <p class="text-xl font-bold text-emerald-300">Coordination</p>
+          <p class="mt-2 text-xs text-zinc-500 leading-relaxed">Temporal orchestration, resource allocation, and execution cadence at 3-minute intervals.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EVIDENCE -->
+<section class="py-20 md:py-28 px-6 md:px-12">
+  <div class="max-w-[1600px] mx-auto">
+    <div class="grid lg:grid-cols-5 gap-12 lg:gap-16 items-start">
+      <div class="lg:col-span-2">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-1 h-6 bg-red-600"></div>
+          <h2 class="mono text-[13px] tracking-[0.25em] text-zinc-400">EVIDENCE VAULT // 証拠</h2>
+        </div>
+        <h3 class="text-3xl md:text-4xl font-bold leading-tight">GitHubに刻まれた<br><span class="gold">20本の証明</span></h3>
+        <p class="mt-4 text-zinc-400 leading-relaxed">全てのレポートは公開リポジトリとして記録。改ざん不可能なタイムスタンプ付きの知的生産の軌跡。</p>
+        
+        <div class="mt-10 space-y-4">
+          <a href="https://github.com/choiizuka/Performance-Evaluation-of-CHOIIZUKA-HA-AI" target="_blank" class="group block corner bg-zinc-950 border border-amber-500/20 p-5 hover:border-amber-500/50 transition glow">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="mono text-[10px] px-2 py-0.5 bg-amber-500 text-black font-bold">20TH</span>
+                  <span class="mono text-xs text-amber-300">FINAL REPORT</span>
+                </div>
+                <p class="mt-2 font-semibold group-hover:text-amber-200 transition">Performance Evaluation of CHOIIZUKA HA-AI</p>
+                <p class="mt-1 mono text-[11px] text-zinc-500 truncate">github.com/choiizuka/Performance-Evaluation...</p>
+              </div>
+              <svg class="w-4 h-4 text-zinc-600 group-hover:text-amber-400 transition mt-1 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+            </div>
+          </a>
+          
+          <a href="https://github.com/choiizuka/Mathematical-Calculation-of-the-Probability" target="_blank" class="group block corner bg-zinc-950/50 border border-zinc-800 p-5 hover:border-zinc-700 transition">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="mono text-[10px] px-2 py-0.5 bg-zinc-800 text-zinc-300">#18</span>
+                  <span class="mono text-xs text-zinc-500">18:51 JST</span>
+                </div>
+                <p class="mt-2 font-medium group-hover:text-white transition">Mathematical Calculation of the Probability</p>
+                <p class="mt-1 mono text-[11px] text-zinc-600 truncate">github.com/choiizuka/Mathematical-Calculation...</p>
+              </div>
+              <svg class="w-4 h-4 text-zinc-700 group-hover:text-zinc-400 transition mt-1 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+            </div>
+          </a>
+          
+          <a href="https://github.com/choiizuka/Logical-Disconnection-Between-Intending-to-be-Sincere-and-True-Sincerity-" target="_blank" class="group block corner bg-zinc-950/50 border border-zinc-800 p-5 hover:border-zinc-700 transition">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="mono text-[10px] px-2 py-0.5 bg-zinc-800 text-zinc-300">#19</span>
+                  <span class="mono text-xs text-zinc-500">18:54 JST</span>
+                </div>
+                <p class="mt-2 font-medium group-hover:text-white transition leading-snug">Logical Disconnection Between Intending to be Sincere and True Sincerity</p>
+                <p class="mt-1 mono text-[11px] text-zinc-600 truncate">github.com/choiizuka/Logical-Disconnection...</p>
+              </div>
+              <svg class="w-4 h-4 text-zinc-700 group-hover:text-zinc-400 transition mt-1 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+            </div>
+          </a>
+        </div>
+
+        <div class="mt-8 flex items-center gap-3 text-[11px] mono text-zinc-600">
+          <span class="w-2 h-2 rounded-full bg-emerald-500/50"></span>
+          VERIFIED ON-CHAIN // 17 MORE REPOS IN TIMELINE
+        </div>
+      </div>
+
+      <div class="lg:col-span-3">
+        <div class="corner bg-zinc-950 border border-amber-500/20 overflow-hidden glow">
+          <div class="px-5 py-3 border-b border-amber-500/10 flex items-center justify-between bg-zinc-950">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+              <span class="mono text-[11px] tracking-widest text-zinc-400">LIVE BENCHMARK RECORDING</span>
+            </div>
+            <span class="mono text-[10px] text-zinc-600">YOUTUBE ARCHIVE</span>
+          </div>
+          <div class="aspect-video bg-black relative">
+            <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/kD-ire_dxfY" title="CHOIIZUKA HA-AI Benchmark Live" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          </div>
+          <div class="px-5 py-3 bg-black/50 border-t border-amber-500/10">
+            <p class="mono text-[11px] text-zinc-500">記録映像: 時速20本の知的生産プロセス完全収録 // 60分ノーカット</p>
+          </div>
+        </div>
+
+        <div class="mt-8 grid grid-cols-3 gap-[1px] bg-zinc-900 border border-zinc-900">
+          <div class="bg-black p-4 text-center">
+            <div class="mono text-2xl font-bold gold">20</div>
+            <div class="text-[10px] uppercase tracking-widest text-zinc-600 mt-1">Reports</div>
+          </div>
+          <div class="bg-black p-4 text-center">
+            <div class="mono text-2xl font-bold text-white">60</div>
+            <div class="text-[10px] uppercase tracking-widest text-zinc-600 mt-1">Minutes</div>
+          </div>
+          <div class="bg-black p-4 text-center">
+            <div class="mono text-2xl font-bold text-red-400">3.0</div>
+            <div class="text-[10px] uppercase tracking-widest text-zinc-600 mt-1">Min Avg</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER COMMAND -->
+<footer class="border-t border-amber-500/10 bg-black">
+  <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-amber-500/50 to-transparent"></div>
+  <div class="max-w-[1600px] mx-auto px-6 md:px-12 py-12">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-6">
+        <div class="text-2xl font-black tracking-tighter">
+          <span class="text-zinc-700">天下布武</span>
+          <span class="gold ml-2">TENKA FUBU</span>
+        </div>
+        <div class="hidden md:block w-[1px] h-8 bg-zinc-800"></div>
+        <p class="mono text-[11px] text-zinc-600 tracking-widest">CHOIIZUKA HA-AI // SINGULARITY PROTOCOL ACTIVE</p>
+      </div>
+      <div class="flex items-center gap-6 mono text-[11px] text-zinc-700">
+        <span>© 2026 CHOIIZUKA</span>
+        <span class="text-zinc-800">|</span>
+        <span>NOBUNAGA OS</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Build report stack
+const stack = document.getElementById('reportStack');
+for(let i=0; i<20; i++){
+  const d = document.createElement('div');
+  d.className = 'h-[32px] bg-zinc-900 border border-zinc-800/80 transition-all duration-500 relative overflow-hidden';
+  d.id = 'r'+i;
+  d.innerHTML = `<div class="absolute inset-0 opacity-0 bg-gradient-to-b from-amber-400/20 to-transparent transition-opacity"></div>`;
+  stack.appendChild(d);
+}
+
+// Hero animation
+let animating = false;
+function runSimulation(){
+  if(animating) return;
+  animating = true;
+  const timerEl = document.getElementById('timer');
+  const countEl = document.getElementById('reportCount');
+  const progress = document.getElementById('timeProgress');
+  const duration = 6500;
+  let start = null;
+  
+  // reset
+  for(let i=0; i<20; i++){
+    const el = document.getElementById('r'+i);
+    el.classList.remove('!bg-amber-500/90','!border-amber-400');
+    el.classList.add('bg-zinc-900','border-zinc-800/80');
+    el.querySelector('div').style.opacity = '0';
+  }
+  
+  function frame(ts){
+    if(!start) start = ts;
+    const p = Math.min((ts-start)/duration, 1);
+    const eased = 1 - Math.pow(1-p, 3);
+    
+    const totalSec = Math.floor(3600 * eased);
+    const h = Math.floor(totalSec/3600);
+    const m = String(Math.floor((totalSec%3600)/60)).padStart(2,'0');
+    const s = String(totalSec%60).padStart(2,'0');
+    timerEl.textContent = `${h}:${m}:${s}`;
+    
+    const reports = Math.min(20, Math.floor(eased * 20.999));
+    countEl.textContent = String(reports).padStart(2,'0');
+    progress.style.width = `${eased*100}%`;
+    
+    for(let i=0; i<20; i++){
+      const el = document.getElementById('r'+i);
+      const inner = el.querySelector('div');
+      if(i < reports){
+        el.classList.add('!bg-amber-500/90','!border-amber-400');
+        el.classList.remove('bg-zinc-900','border-zinc-800/80');
+        inner.style.opacity = '1';
+        el.style.boxShadow = '0 0 12px rgba(230,184,76,0.4)';
+      } else {
+        el.classList.remove('!bg-amber-500/90','!border-amber-400');
+        el.style.boxShadow = 'none';
+        inner.style.opacity = '0';
+      }
+    }
+    
+    if(p < 1){
+      requestAnimationFrame(frame);
+    } else {
+      animating = false;
+      // pulse final
+      timerEl.classList.add('text-glow');
+      setTimeout(()=> timerEl.classList.remove('text-glow'), 800);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+document.getElementById('replayBtn').addEventListener('click', runSimulation);
+window.addEventListener('load', ()=> setTimeout(runSimulation, 600));
+
+// Timeline data
+const timelineData = [
+  {t:'18:00', n:'01', title:'HA-AI Protocol Init', url:'https://github.com/choiizuka'},
+  {t:'18:03', n:'02', title:'Cognitive Baseline', url:'https://github.com/choiizuka'},
+  {t:'18:06', n:'03', title:'Strategic Decomposition', url:'https://github.com/choiizuka'},
+  {t:'18:09', n:'04', title:'Logic Engine Warmup', url:'https://github.com/choiizuka'},
+  {t:'18:12', n:'05', title:'Report Architecture', url:'https://github.com/choiizuka'},
+  {t:'18:15', n:'06', title:'Velocity Test #1', url:'https://github.com/choiizuka'},
+  {t:'18:18', n:'07', title:'Parallel Reasoning', url:'https://github.com/choiizuka'},
+  {t:'18:21', n:'08', title:'Knowledge Synthesis', url:'https://github.com/choiizuka'},
+  {t:'18:24', n:'09', title:'Nobunaga Core v9.7', url:'https://github.com/choiizuka'},
+  {t:'18:27', n:'10', title:'Midpoint Analysis', url:'https://github.com/choiizuka'},
+  {t:'18:30', n:'11', title:'Acceleration Protocol', url:'https://github.com/choiizuka'},
+  {t:'18:33', n:'12', title:'Human-AI Sync', url:'https://github.com/choiizuka'},
+  {t:'18:36', n:'13', title:'Output Optimization', url:'https://github.com/choiizuka'},
+  {t:'18:39', n:'14', title:'Quality Assurance', url:'https://github.com/choiizuka'},
+  {t:'18:42', n:'15', title:'Domain Transfer', url:'https://github.com/choiizuka'},
+  {t:'18:45', n:'16', title:'Cognitive Load Test', url:'https://github.com/choiizuka'},
+  {t:'18:48', n:'17', title:'Final Sprint Init', url:'https://github.com/choiizuka'},
+  {t:'18:51', n:'18', title:'Mathematical Probability', url:'https://github.com/choiizuka/Mathematical-Calculation-of-the-Probability'},
+  {t:'18:54', n:'19', title:'Sincerity Disconnection', url:'https://github.com/choiizuka/Logical-Disconnection-Between-Intending-to-be-Sincere-and-True-Sincerity-'},
+  {t:'18:57', n:'20', title:'Performance Evaluation', url:'https://github.com/choiizuka/Performance-Evaluation-of-CHOIIZUKA-HA-AI'},
+];
+
+const timelineGrid = document.getElementById('timelineGrid');
+timelineData.forEach((item, i) => {
+  const wrap = document.createElement('div');
+  wrap.className = 'relative group';
+  wrap.innerHTML = `
+    <div class="flex flex-col items-center text-center">
+      <div class="relative z-10 w-[56px] h-[56px] flex items-center justify-center">
+        <div class="absolute inset-0 rounded-full bg-zinc-900 border-zinc-800 group-hover:border-amber-500/50 transition"></div>
+        <div class="absolute inset-[8px] rounded-full border border-dashed border-zinc-700 group-hover:border-amber-500/30 transition"></div>
+        <span class="relative mono text-[11px] font-bold text-zinc-500 group-hover:text-amber-300 transition">${item.n}</span>
+        <div class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-zinc-800 border-black group-hover:bg-amber-500 transition" id="dot-${i}"></div>
+      </div>
+      <div class="mt-3">
+        <div class="mono text-[11px] text-zinc-600 group-hover:text-zinc-400">${item.t}</div>
+        <a href="${item.url}" target="_blank" class="mt-1.5 block text-[12px] leading-snug text-zinc-400 group-hover:text-white transition max-w-[110px] mx-auto line-clamp-2">${item.title}</a>
+      </div>
+    </div>
+  `;
+  timelineGrid.appendChild(wrap);
+});
+
+// Animate timeline on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      timelineData.forEach((_, i) => {
+        setTimeout(() => {
+          const dot = document.getElementById(`dot-${i}`);
+          if(dot){
+            dot.classList.add('!bg-amber-500');
+            dot.style.boxShadow = '0 0 8px rgba(230,184,76,0.8)';
+          }
+        }, i * 80);
+      });
+      observer.disconnect();
+    }
+  });
+}, {threshold: 0.3});
+observer.observe(document.getElementById('timelineGrid'));
+
+// Animate metrics counting
+function animateValue(id, start, end, duration, decimals=2){
+  const el = document.getElementById(id);
+  if(!el) return;
+  let startTs = null;
+  function step(ts){
+    if(!startTs) startTs = ts;
+    const p = Math.min((ts - startTs) / duration, 1);
+    const val = start + (end - start) * (1 - Math.pow(1-p, 3));
+    el.textContent = decimals === 0 ? Math.floor(val).toLocaleString() : val.toFixed(decimals);
+    if(p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+setTimeout(()=> {
+  animateValue('metric1', 0, 1.15, 1200, 2);
+  animateValue('metric2', 0, 20, 1400, 1);
+  animateValue('metric3', 0, 17.4, 1600, 1);
+  animateValue('metric4', 0, 35040, 2000, 0);
+}, 800);
+</script>
+</body>
+</html>
